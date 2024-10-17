@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.primary-btn-bg {
+    background: #56a7dc;
+}
+
+.primary-btn-bg:hover {
+    background: #4a97ca;
+}
+
+.primary-btn-ring {
+    --tw-ring-color: #56a7dc;
+}
+
+.primary-border-clr {
+    border-color: #094b76;
+}
