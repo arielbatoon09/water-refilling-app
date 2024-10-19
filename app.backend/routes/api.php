@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\GallonTypeController as GallonType;
 use App\Http\Controllers\Admin\RefillController as AdminRefill;
+use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
 use App\Http\Controllers\Client\RefillController as Refill;
 
 // Global Access
@@ -26,4 +27,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     Route::get('/get-refills', [Refill::class, 'getAllRefills']);
     Route::post('/add-refills', [Refill::class, 'addRefilling']);
+
+    Route::post('/add-item-inventory', [ItemInventory::class, 'addItemInventory']);
+    Route::get('/get-item-inventory', [ItemInventory::class, 'getAllItemInventory']);
+    Route::post('/update-item-inventory', [ItemInventory::class, 'updateItemInventory']);
+    Route::post('/delete-item-inventory/{id}', [ItemInventory::class, 'deleteItemInventory']);
 });
