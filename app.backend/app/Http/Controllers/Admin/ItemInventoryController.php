@@ -118,11 +118,4 @@ class ItemInventoryController extends Controller
         }
     }
 
-    private function response($status, $message)
-    {
-        return [
-            'status' => $status,
-            'message' => $message,
-        ];
-    }
 }

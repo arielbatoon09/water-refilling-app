@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\GallonTypeController as GallonType;
 use App\Http\Controllers\Admin\RefillController as AdminRefill;
 use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
 use App\Http\Controllers\Client\RefillController as Refill;
+use App\Http\Controllers\Global\ItemsController as globalItems;
+use App\Http\Controllers\Client\OrderCartController as order;
+use App\Http\Controllers\Client\OrderCheckoutController as checkout;
 
 // Global Access
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,4 +35,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/get-item-inventory', [ItemInventory::class, 'getAllItemInventory']);
     Route::post('/update-item-inventory', [ItemInventory::class, 'updateItemInventory']);
     Route::post('/delete-item-inventory/{id}', [ItemInventory::class, 'deleteItemInventory']);
+
+    Route::get('/browser-items', [globalItems::class, 'getAllItem']);
+    Route::post('/add-to-cart', [order::class, 'addToCart']);
+    Route::post('/remove-to-cart/{id}', [order::class, 'removeOrderToCart']);
+
+    Route::post('/checkout', [checkout::class, 'checkout']);
 });
