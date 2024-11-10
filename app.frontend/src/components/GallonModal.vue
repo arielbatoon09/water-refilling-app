@@ -7,6 +7,7 @@ import EventBus from '@/js/EventBus';
 const gallonStore = useGallonStore();
 const closeModal = ref(null);
 const errorIndicator = ref(false);
+const errorMsg = ref(null);
 
 const FormData = ref({
   gallon_image: null,
@@ -32,10 +33,15 @@ const handleNewGallon = async () => {
     FormData.value.gallon_size = null;
     FormData.value.gallon_price = null;
     FormData.value.delivery_fee = null;
+    errorIndicator.value = false;
+    errorMsg.value = null;
 
-    closeModal.value.click(); 
+    closeModal.value.click();
 
     EventBus.emit('gallonUpdated');
+  } else {
+    errorIndicator.value = true;
+    errorMsg.value = response.message;
   }
 }
 
@@ -74,7 +80,7 @@ const uploadImage = (event) => {
             stroke="#e86868" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
         </g>
       </svg>
-      Error: Make sure fill up the booking details.
+      Error: {{ errorMsg }}
     </p>
 
     <!-- Gallon Data Fields -->

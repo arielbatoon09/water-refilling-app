@@ -143,7 +143,7 @@ onMounted(() => {
     <!-- Delivery Data Fields -->
     <div class="w-full">
       <!-- Gallon Sizes & Quanity Pills -->
-      <div class="mt-4 flex flex-wrap gap-2" v-if="gallonPills.length > 0">
+      <div class="mt-4 flex flex-wrap gap-2]" v-if="gallonPills.length > 0">
         <div v-for="(pill, index) in gallonPills" :key="index"
           class="badge bg-gray-200 hover:bg-gray-300 cursor-pointer py-3 gap-2">
           <svg @click="removeGallonPills(index)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -166,7 +166,7 @@ onMounted(() => {
             </button>
 
             <div v-if="isOpenGallonDropdown"
-              class="absolute w-full mt-1 bg-white border border-gray-300 rounded shadow-lg z-10">
+              class="absolute w-full mt-1 bg-white border border-gray-300 rounded shadow-lg z-10 h-[8rem] overflow-y-auto">
               <div v-for="gallon in gallonData" :key="gallon.id" @click="selectGallonOption(gallon)"
                 class="px-4 py-2 cursor-pointer hover:bg-gray-100 flex items-center space-x-2">
                 <img :src="gallon.gallon_image" alt="" class="w-6 h-6" />

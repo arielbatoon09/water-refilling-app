@@ -40,23 +40,39 @@ class GallonTypeController extends Controller
                 'gallon_image' => 'required|string',
                 'delivery_fee' => 'required|numeric',
             ]);
-
+    
+            if ($validator->fails()) {
+                return response([
+                    'status' => 422,
+                    'source' => 'GallonTypeController',
+                    'message' => 'Make sure fill up the booking details.',
+                    'errors' => $validator->errors()
+                ]);
+            }
+    
+            // Check if gallon_size already exists
+            if (GallonType::where('gallon_size', $request->input('gallon_size'))->exists()) {
+                return response([
+                    'status' => 409,
+                    'source' => 'GallonTypeController',
+                    'message' => 'Gallon size already exists!'
+                ]);
+            }
+    
             // Handle image upload from Base64 string
             if ($request->filled('gallon_image')) {
                 $base64Image = $request->input('gallon_image');
-                
                 preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches);
                 $extension = $matches[1] ?? 'png';
-
+    
                 // Remove the base64 prefix from the string
                 $imageData = substr($base64Image, strpos($base64Image, ',') + 1);
                 $imageData = base64_decode($imageData);
-
+    
                 // Generate a random name for the image
                 $randomImageName = 'image-' . Str::random(40) . '.' . $extension;
                 $imagePath = 'gallon/' . $randomImageName;
-
-                // Store the image in the 'public/gallon_images' directory
+    
                 Storage::disk('public')->put($imagePath, $imageData);
             } else {
                 return response([
@@ -83,7 +99,8 @@ class GallonTypeController extends Controller
         } catch (\Throwable $th) {
             return response($this->response(501, $th));
         }
-    }    
+    }
+     
 
     private function getAllGallonTypeFunction()
     {
