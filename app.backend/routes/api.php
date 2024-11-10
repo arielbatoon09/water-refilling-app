@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
 use App\Http\Controllers\Client\RefillController as Refill;
 use App\Http\Controllers\Global\ItemsController as globalItems;
 use App\Http\Controllers\Client\OrderCartController as order;
+use App\Http\Controllers\Global\ProductController as products;
 use App\Http\Controllers\Client\OrderCheckoutController as checkout;
 
 // Global Access
@@ -38,6 +39,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/get-item-inventory', [ItemInventory::class, 'getAllItemInventory']);
     Route::post('/update-item-inventory', [ItemInventory::class, 'updateItemInventory']);
     Route::post('/delete-item-inventory/{id}', [ItemInventory::class, 'deleteItemInventory']);
+    
+    Route::get('/get-products', [products::class, 'getProducts']);
+    Route::get('/get-products-by-pid/{id}', [products::class, 'selectedProduct']);
+    Route::post('/add-product', [products::class, 'addProductItem']);
+    Route::post('/update-product/{id}', [products::class, 'updateProduct']);
 
     Route::get('/browser-items', [globalItems::class, 'getAllItem']);
     Route::post('/add-to-cart', [order::class, 'addToCart']);

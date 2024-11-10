@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class item_inventory extends Model
+class Product extends Model
 {
     protected $fillable = [
         "image_url",
@@ -12,6 +12,6 @@ class item_inventory extends Model
         "item_description",
         "item_stocks",
         "item_price",
-        "status"
+        "flag"
     ];
 }
