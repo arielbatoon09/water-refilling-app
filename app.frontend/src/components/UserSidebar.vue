@@ -13,6 +13,7 @@ const navLinks = ref([
   { name: 'Refill Water', route: '/refill' },
   { name: 'Shop', route: '/shop' },
   { name: 'Cart', route: '/cart' },
+  { name: 'My Purchase', route: '/purchase' },
 ]);
 
 onMounted(() => {
@@ -105,6 +106,14 @@ const navigateTo = (route) => {
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
+            </svg>
+
+            <!-- Purchase Icon -->
+            <svg v-if="link.name === 'My Purchase'" class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z" />
             </svg>
 
             <!-- Router Name -->

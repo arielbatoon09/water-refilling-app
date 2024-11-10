@@ -17,6 +17,7 @@ import HomeView from '../views/User/HomeView.vue'
 import RefillView from '../views/User/RefillView.vue'
 import ShopView from '../views/User/ShopView.vue'
 import CartView from '../views/User/CartView.vue'
+import PurchaseView from '../views/User/PurchaseView.vue'
 import Success from '../views/User/SuccessView.vue'
 
 const routes = [
@@ -92,6 +93,11 @@ const routes = [
     path: '/cart',
     name: 'Cart',
     component: CartView,
+  },
+  {
+    path: '/purchase',
+    name: 'My Purchase',
+    component: PurchaseView,
   },
   {
     path: '/success',
