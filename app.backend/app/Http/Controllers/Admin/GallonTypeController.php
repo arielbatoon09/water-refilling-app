@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\GallonType;
 use Throwable;
@@ -30,24 +33,57 @@ class GallonTypeController extends Controller
     private function AddGallonTypeFunction(Request $request)
     {
         try {
+            // Validate request inputs
+            $validator = Validator::make($request->all(), [
+                'gallon_size' => 'required|string|max:255',
+                'gallon_price' => 'required|numeric',
+                'gallon_image' => 'required|string',
+                'delivery_fee' => 'required|numeric',
+            ]);
+
+            // Handle image upload from Base64 string
+            if ($request->filled('gallon_image')) {
+                $base64Image = $request->input('gallon_image');
+                
+                preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches);
+                $extension = $matches[1] ?? 'png';
+
+                // Remove the base64 prefix from the string
+                $imageData = substr($base64Image, strpos($base64Image, ',') + 1);
+                $imageData = base64_decode($imageData);
+
+                // Generate a random name for the image
+                $randomImageName = 'image-' . Str::random(40) . '.' . $extension;
+                $imagePath = 'gallon/' . $randomImageName;
+
+                // Store the image in the 'public/gallon_images' directory
+                Storage::disk('public')->put($imagePath, $imageData);
+            } else {
+                return response([
+                    'status' => 400,
+                    'source' => 'GallonTypeController',
+                    'message' => 'No valid image provided!'
+                ]);
+            }
+    
+            // Create the new GallonType entry
             GallonType::create([
                 "gallon_size" => $request->input('gallon_size'),
                 "gallon_price" => $request->input('gallon_price'),
-                "gallon_image" => $request->input('gallon_image'),
+                "gallon_image" => env('APP_URL').'/storage/'.$imagePath,
                 "delivery_fee" => $request->input('delivery_fee'),
                 "flag" => 1
             ]);
-
+    
             return response([
                 'status' => 200,
                 'source' => 'GallonTypeController',
-                'message' => "Added New Gallon Size!"
+                'message' => "Added New Gallon Type!"
             ]);
-
         } catch (\Throwable $th) {
             return response($this->response(501, $th));
         }
-    }
+    }    
 
     private function getAllGallonTypeFunction()
     {

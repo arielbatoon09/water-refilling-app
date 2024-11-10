@@ -1,25 +1,25 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeViews from '../views/HomeView.vue'
-import AuthView from '../views/AuthView.vue'
+import HomeViews from '@/views/HomeView.vue'
+import AuthView from '@/views/AuthView.vue'
 
 // ADMIN
-import DashboardView from '../views/Admin/DashboardView.vue'
-import ManageRefillView from '../views/Admin/ManageRefillView.vue'
-import DeliveryView from '../views/Admin/DeliveryView.vue'
-import InventoryView from '../views/Admin/InventoryView.vue'
-import SalesView from '../views/Admin/SalesView.vue'
-import FeedbackView from '../views/Admin/FeedbackView.vue'
-import UserManagementView from '../views/Admin/UserManagementView.vue'
-import SettingsView from '../views/Admin/SettingsView.vue'
+import DashboardView from '@/views/Admin/DashboardView.vue'
+import GallonView from '@/views/Admin/GallonView.vue'
+import ManageRefillView from '@/views/Admin/ManageRefillView.vue'
+import DeliveryView from '@/views/Admin/DeliveryView.vue'
+import InventoryView from '@/views/Admin/InventoryView.vue'
+import SalesView from '@/views/Admin/SalesView.vue'
+import FeedbackView from '@/views/Admin/FeedbackView.vue'
+import UserManagementView from '@/views/Admin/UserManagementView.vue'
+import SettingsView from '@/views/Admin/SettingsView.vue'
 
 // USER
-import HomeView from '../views/User/HomeView.vue'
-import RefillView from '../views/User/RefillView.vue'
-import ShopView from '../views/User/ShopView.vue'
-import CartView from '../views/User/CartView.vue'
-import PurchaseView from '../views/User/PurchaseView.vue'
-import Success from '../views/User/SuccessView.vue'
-
+import HomeView from '@/views/User/HomeView.vue'
+import RefillView from '@/views/User/RefillView.vue'
+import ShopView from '@/views/User/ShopView.vue'
+import CartView from '@/views/User/CartView.vue'
+import PurchaseView from '@/views/User/PurchaseView.vue'
+import Success from '@/views/User/SuccessView.vue'
 const routes = [
   {
     path: '/',
@@ -36,6 +36,11 @@ const routes = [
     path: '/admin/dashboard',
     name: 'Dashboard',
     component: DashboardView
+  },
+  {
+    path: '/admin/gallon',
+    name: 'Gallon Type',
+    component: GallonView
   },
   {
     path: '/admin/refill',

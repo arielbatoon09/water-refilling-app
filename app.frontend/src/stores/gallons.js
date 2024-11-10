@@ -18,6 +18,21 @@ export const useGallonStore = defineStore('gallon', {
       }
     },
 
+    async addGallonType(FormData) {
+      try {
+        await this.getToken();
+        const response = await axios.post('/api/add-gallon-type', {
+          gallon_image: FormData.gallon_image,
+          gallon_size: FormData.gallon_size,
+          gallon_price: FormData.gallon_price,
+          delivery_fee: FormData.delivery_fee,
+        });
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
 
   },
 });
