@@ -21,7 +21,7 @@ const payRefillNow = async (data) => {
   const result = await Swal.fire({
     title: 'Pay Now',
     text: 'Proceed to pay the order via e-Payment?',
-    icon: 'success',
+    icon: 'warning',
     showCancelButton: true,
     confirmButtonText: 'Confirm',
     cancelButtonText: 'Cancel',

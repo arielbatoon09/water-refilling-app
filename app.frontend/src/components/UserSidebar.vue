@@ -11,6 +11,8 @@ const sidebarStore = useSidebarStore();
 const navLinks = ref([
   { name: 'Home', route: '/home' },
   { name: 'Refill Water', route: '/refill' },
+  { name: 'Shop', route: '/shop' },
+  { name: 'Cart', route: '/cart' },
 ]);
 
 onMounted(() => {
@@ -89,46 +91,20 @@ const navigateTo = (route) => {
                 d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z" />
             </svg>
 
-            <!-- Delivery Icon -->
-            <svg v-if="link.name === 'Delivery'" class="w-[24px] h-[24px] text-gray-700"
+            <!-- Shop Icon -->
+            <svg v-if="link.name === 'Shop'" class="w-[24px] h-[24px] text-gray-700"
               :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M13 7h6l2 4m-8-4v8m0-8V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v9h2m8 0H9m4 0h2m4 0h2v-4m0 0h-5m3.5 5.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-10 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
+                d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
             </svg>
 
-            <!-- Inventory Icon -->
-            <svg v-if="link.name === 'Inventory'" class="w-[24px] h-[24px] text-gray-700"
+            <!-- Cart Icon -->
+            <svg v-if="link.name === 'Cart'" class="w-[24px] h-[24px] text-gray-700"
               :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M12 6h8m-8 6h8m-8 6h8M4 16a2 2 0 1 1 3.321 1.5L4 20h5M4 5l2-1v6m-2 0h4" />
-            </svg>
-
-            <!-- Sales Icon -->
-            <svg v-if="link.name === 'Sales'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M10 6.025A7.5 7.5 0 1 0 17.975 14H10V6.025Z" />
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M13.5 3c-.169 0-.334.014-.5.025V11h7.975c.011-.166.025-.331.025-.5A7.5 7.5 0 0 0 13.5 3Z" />
-            </svg>
-
-            <!-- Feedback Icon -->
-            <svg v-if="link.name === 'Feedback'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M7.556 8.5h8m-8 3.5H12m7.111-7H4.89a.896.896 0 0 0-.629.256.868.868 0 0 0-.26.619v9.25c0 .232.094.455.26.619A.896.896 0 0 0 4.89 16H9l3 4 3-4h4.111a.896.896 0 0 0 .629-.256.868.868 0 0 0 .26-.619v-9.25a.868.868 0 0 0-.26-.619.896.896 0 0 0-.63-.256Z" />
-            </svg>
-
-            <!-- User Management Icon -->
-            <svg v-if="link.name === 'User Management'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
-                d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3.05A2.5 2.5 0 1 1 9 5.5M19.5 17h.5a1 1 0 0 0 1-1 3 3 0 0 0-3-3h-1m0-3.05a2.5 2.5 0 1 0-2-4.45m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3 1 1 0 0 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
+                d="M9 10V6a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v4m3-2 .917 11.923A1 1 0 0 1 17.92 21H6.08a1 1 0 0 1-.997-1.077L6 8h12Z" />
             </svg>
 
             <!-- Router Name -->
