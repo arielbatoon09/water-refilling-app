@@ -1,0 +1,5 @@
+API:
+1. CRUD for Book Delivery - Done
+2. CRUD for Galloon Type - Done
+3. Item Inventory - In Progress
+4. User can order item - N/A

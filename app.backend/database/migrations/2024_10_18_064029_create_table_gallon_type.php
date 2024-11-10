@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('gallon_types', function (Blueprint $table) {
             $table->id();
-            $table->string('gallon_details');
             $table->string('gallon_size');
-            $table->integer('price');
+            $table->integer('gallon_price');
+            $table->string('gallon_image');
             $table->integer('delivery_fee');
             $table->integer('flag');
             $table->timestamps();

@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class GallonType extends Model
 {
     protected $fillable = [
-        "gallon_details",
         "gallon_size",
-        "price",
+        "gallon_price",
+        "gallon_image",
         "delivery_fee",
         "flag",  
     ];

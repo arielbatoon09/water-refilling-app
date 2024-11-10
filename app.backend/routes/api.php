@@ -18,18 +18,21 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Authenticated
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('/users', [AuthController::class, 'users']);
+    Route::get('/user', [AuthController::class, 'user']);
 
     Route::get('/logout', [AuthController::class, 'logout']);
 
-    Route::get('/get-gallon-type', [GallonType::class, 'getAllGallonType']);
+    Route::get('/get-all-gallon', [GallonType::class, 'getAllGallonType']);
     Route::post('/add-gallon-type', [GallonType::class, 'AddGallonType']);
     Route::post('/update-gallon-type', [GallonType::class, 'updateGallonTypes']);
     Route::post('/delete-gallon-type/{id}', [GallonType::class, 'deleteGallonType']);
     Route::post('/update-refills', [AdminRefill::class, 'updateRefilling']);
 
-    Route::get('/get-refills', [Refill::class, 'getAllRefills']);
+    Route::get('/get-refills-by-uid', [Refill::class, 'getRefillsByUID']);
     Route::post('/add-refills', [Refill::class, 'addRefilling']);
+    Route::post('/pay-refills', [Refill::class, 'payRefillOrder']);
+    Route::post('/paid-refill', [Refill::class, 'paidRefillOrder']);
+    Route::post('/cancel-refill/{id}', [Refill::class, 'cancelOrder']);
 
     Route::post('/add-item-inventory', [ItemInventory::class, 'addItemInventory']);
     Route::get('/get-item-inventory', [ItemInventory::class, 'getAllItemInventory']);

@@ -9,12 +9,8 @@ const sidebarStore = useSidebarStore();
 
 // Define the navigation links
 const navLinks = ref([
-  { name: 'Dashboard', route: '/admin/dashboard' },
-  { name: 'Manage Refill', route: '/admin/refill' },
-  { name: 'Delivery', route: '/admin/delivery' },
-  { name: 'Inventory', route: '/admin/inventory' },
-  { name: 'Sales', route: '/admin/sales' },
-  { name: 'Feedback', route: '/admin/feedback' },
+  { name: 'Home', route: '/home' },
+  { name: 'Refill Water', route: '/refill' },
 ]);
 
 onMounted(() => {
@@ -56,11 +52,11 @@ const navigateTo = (route) => {
       sidebarStore.sidebarOpen ? 'translate-x-0' : '-translate-x-full'
     ]">
 
-      <div class="flex justify-between items-center px-4 py-4 bg-[#094b76]">
+      <div class="flex justify-between items-center px-4 py-4 bg-white">
         <!-- Panel Logo -->
         <div class="flex items-center gap-2">
           <img width="50" :src="Logo" />
-          <h2 class="text-base lg:text-xl font-bold">Alexa <span class="font-normal">Water Refilling Station</span></h2>
+          <h2 class="text-base lg:text-xl font-bold text-[#4a97ca]">Alexa Water Refilling Station</h2>
         </div>
         <!-- Close Button for Mobile -->
         <button class="lg:hidden text-gray-300" @click="closeSidebar">
@@ -77,16 +73,16 @@ const navigateTo = (route) => {
           <li v-for="link in navLinks" :key="link.route" @click="navigateTo(link.route)"
             class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
             :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === link.route }">
-            <!-- Dashboard Icon -->
-            <svg v-if="link.name === 'Dashboard'" class="w-[24px] h-[24px] text-gray-700"
+            <!-- Home Icon -->
+            <svg v-if="link.name === 'Home'" class="w-[24px] h-[24px] text-gray-700"
               :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M9.143 4H4.857A.857.857 0 0 0 4 4.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 10 9.143V4.857A.857.857 0 0 0 9.143 4Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 20 9.143V4.857A.857.857 0 0 0 19.143 4Zm-10 10H4.857a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286A.857.857 0 0 0 9.143 14Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286a.857.857 0 0 0-.857-.857Z" />
+                d="m4 12 8-8 8 8M6 10.5V19a1 1 0 0 0 1 1h3v-3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3h3a1 1 0 0 0 1-1v-8.5" />
             </svg>
 
-            <!-- Manage Refill Icon -->
-            <svg v-if="link.name === 'Manage Refill'" class="w-[24px] h-[24px] text-gray-700"
+            <!-- Refill Icon -->
+            <svg v-if="link.name === 'Refill Water'" class="w-[24px] h-[24px] text-gray-700"
               :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -149,7 +145,7 @@ const navigateTo = (route) => {
               <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="1.5"
                 d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
-            <span>Account Settings</span>
+            <span>Other 1</span>
           </li>
 
           <li @click="navigateTo('/admin/management')"
@@ -161,23 +157,15 @@ const navigateTo = (route) => {
               <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
                 d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3.05A2.5 2.5 0 1 1 9 5.5M19.5 17h.5a1 1 0 0 0 1-1 3 3 0 0 0-3-3h-1m0-3.05a2.5 2.5 0 1 0-2-4.45m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3 1 1 0 0 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
             </svg>
-            <span>User Management</span>
+            <span>Other 2</span>
           </li>
         </ul>
       </nav>
 
       <!-- Avatar -->
       <div class="text-gray-700 border-t">
-        <div class="p-4 flex items-center gap-4">
-          <div class="avatar online">
-            <div class="w-12 rounded-full">
-              <img src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
-            </div>
-          </div>
-          <div>
-            <h3 class="text-gray-700 font-bold text-base">John Doe</h3>
-            <p class="-mt-1 font-normal text-gray-600">Administrator</p>
-          </div>
+        <div class="p-4 -ml-8">
+          <p class="text-gray-500 text-sm text-center">Version 1.0.0</p>
         </div>
       </div>
     </div>

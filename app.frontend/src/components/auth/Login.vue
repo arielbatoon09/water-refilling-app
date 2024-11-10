@@ -1,8 +1,46 @@
 <script setup>
-import { RouterLink } from 'vue-router';
+import { ref } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import Logo from '@/assets/logo.png';
+import { useAuthStore } from '../../stores/auth';
+import Swal from 'sweetalert2';
 
 defineEmits(['authToggle']);
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+const FormData = ref({
+  email: null,
+  password: null,
+});
+
+const handleLogin = async () => {
+  const response = await authStore.login(FormData.value);
+  console.log(response);
+
+  if (response.status === 'success') {
+    FormData.value.email = null;
+    FormData.value.password = null;
+
+    router.push('/home');
+
+    Swal.fire({
+      title: 'Great',
+      text: 'Successfully Logged In!',
+      icon: 'success',
+      confirmButtonText: 'Confirm'
+    });
+  } else if (response.status === 'error') {
+    Swal.fire({
+      title: 'Error!',
+      text: response.message,
+      icon: 'error',
+      confirmButtonText: 'Confirm'
+    });
+  }
+};
+
 </script>
 
 <template>
@@ -17,24 +55,24 @@ defineEmits(['authToggle']);
 
   <!-- Form -->
   <div class="mx-auto max-w-lg rounded-lg border">
-    <div class="flex flex-col gap-4 p-4 md:p-8">
+    <div class="flex flex-col gap-2 p-4 md:p-8">
 
       <!-- Email -->
-      <div class="mb-2 inline-block">
+      <div class="space-y-2 mb-2 inline-block">
         <label for="email" class="text-sm text-gray-800 sm:text-base">Email</label>
-        <input name="email" type="email"
+        <input v-model="FormData.email" name="email" type="email"
           class="w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none primary-btn-ring transition duration-100 focus:ring" />
       </div>
 
       <!-- Password -->
-      <div class="mb-2 inline-block">
+      <div class="space-y-2 mb-2 inline-block">
         <label for="password" class="text-sm text-gray-800 sm:text-base">Password</label>
-        <input name="password" type="password"
+        <input v-model="FormData.password" name="password" type="password"
           class="w-full rounded border bg-gray-50 px-3 py-2 text-gray-800 outline-none primary-btn-ring transition duration-100 focus:ring" />
       </div>
 
       <!-- Login Button -->
-      <button class="btn primary-btn-bg text-white">Log in</button>
+      <button @click="handleLogin" class="btn primary-btn-bg text-white">Log in</button>
 
       <!-- Redirection -->
       <div class="space-y-4">

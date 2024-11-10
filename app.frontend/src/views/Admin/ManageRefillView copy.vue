@@ -80,7 +80,7 @@ const nextPage = () => {
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M5 12h14m-7 7V5" />
         </svg>
-        Manual Order
+        Manual Refill
       </button>
       
       <!-- Add Order & Search Button -->

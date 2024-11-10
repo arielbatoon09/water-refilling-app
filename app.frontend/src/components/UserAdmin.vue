@@ -10,7 +10,7 @@ const sidebarStore = useSidebarStore();
 // Define the navigation links
 const navLinks = ref([
   { name: 'Dashboard', route: '/admin/dashboard' },
-  { name: 'Manage Refill', route: '/admin/refill' },
+  { name: 'Orders', route: '/admin/order' },
   { name: 'Delivery', route: '/admin/delivery' },
   { name: 'Inventory', route: '/admin/inventory' },
   { name: 'Sales', route: '/admin/sales' },
@@ -85,12 +85,12 @@ const navigateTo = (route) => {
                 d="M9.143 4H4.857A.857.857 0 0 0 4 4.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 10 9.143V4.857A.857.857 0 0 0 9.143 4Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 20 9.143V4.857A.857.857 0 0 0 19.143 4Zm-10 10H4.857a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286A.857.857 0 0 0 9.143 14Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286a.857.857 0 0 0-.857-.857Z" />
             </svg>
 
-            <!-- Manage Refill Icon -->
-            <svg v-if="link.name === 'Manage Refill'" class="w-[24px] h-[24px] text-gray-700"
+            <!-- Order Icon -->
+            <svg v-if="link.name === 'Orders'" class="w-[24px] h-[24px] text-gray-700"
               :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z" />
+                d="M5 4h1.5L9 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-8.5-3h9.25L19 7H7.312" />
             </svg>
 
             <!-- Delivery Icon -->

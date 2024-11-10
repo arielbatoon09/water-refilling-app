@@ -11,12 +11,9 @@ use Throwable;
 
 class AuthController extends Controller
 {
-    public function users()
+    public function user()
     {
-        return response()->json([
-            'status' => 'success',
-            'user' => Auth::user(),
-        ]);
+        return Auth::user();
     }
 
     // Register User
@@ -69,7 +66,7 @@ class AuthController extends Controller
                 return response([
                     'source' => 'emptyField',
                     'status' => 'error',
-                    'message' => "Please fill out this field."
+                    'message' => "Please fill out the field/s."
                 ]);
             }
         } catch (Throwable $e) {

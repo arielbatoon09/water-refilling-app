@@ -13,37 +13,37 @@ class GallonTypeController extends Controller
         return $this->getAllGallonTypeFunction();
     }
 
-    public function AddGallonType(Request $req)
+    public function AddGallonType(Request $request)
     {
-        return $this->AddGallonTypeFunction($req);
+        return $this->AddGallonTypeFunction($request);
     }
 
-    public function updateGallonTypes(Request $req){
-        return $this->updateGallonTypesFunction($req);
+    public function updateGallonTypes(Request $request){
+        return $this->updateGallonTypesFunction($request);
     }
 
-    public function deleteGallonType(Request $req)
+    public function deleteGallonType(Request $request)
     {
-        return $this->deleteGallonTypeFuntion($req);
+        return $this->deleteGallonTypeFuntion($request);
     }
 
-    private function AddGallonTypeFunction(Request $req)
+    private function AddGallonTypeFunction(Request $request)
     {
         try {
-            $gallonType = GallonType::where('gallon_size', $req->size)->first();
+            GallonType::create([
+                "gallon_size" => $request->input('gallon_size'),
+                "gallon_price" => $request->input('gallon_price'),
+                "gallon_image" => $request->input('gallon_image'),
+                "delivery_fee" => $request->input('delivery_fee'),
+                "flag" => 1
+            ]);
 
-            if(!$gallonType){
-                GallonType::create([
-                    "gallon_details" => $req->input('details'),
-                    "gallon_size" => $req->input('size'),
-                    "price" => $req->input('price'),
-                    "delivery_fee" => $req->input('fee'),
-                    "flag" => 0
-                ]);
-                return response($this->response(200, 'Successfully Addded!'));
-            }else{
-                return response($this->response(409, 'This gallon is already exist!'));
-            }
+            return response([
+                'status' => 200,
+                'source' => 'GallonTypeController',
+                'message' => "Added New Gallon Size!"
+            ]);
+
         } catch (\Throwable $th) {
             return response($this->response(501, $th));
         }
@@ -52,17 +52,17 @@ class GallonTypeController extends Controller
     private function getAllGallonTypeFunction()
     {
         try {
-            $gallonTypes = GallonType::where('flag', 0)->get();
+            $gallonTypes = GallonType::where('flag', 1)->get();
 
             $gallonDatas = [];
 
             foreach ($gallonTypes as $data) {
                 $gallonDatas[$data->id] = [
                     'id' => $data->id,
-                    "gallon_details" => $data->gallon_details,
                     "gallon_size" => $data->gallon_size,
-                    "price" => $data->price,
+                    "gallon_price" => $data->gallon_price,
                     "delivery_fee" => $data->delivery_fee,
+                    "gallon_image" => $data->gallon_image,
                     "flag" => $data->flag,
                     "created_at" => $data->created_at,
                     "updated_at" => $data->updated_at,
@@ -70,8 +70,9 @@ class GallonTypeController extends Controller
             }
 
             return response([
+                'status' => 200,
+                'source' => 'GallonTypeController',
                 'data' => $gallonDatas,
-                $this->response(200, 'All Data in Flag 0')
             ]);
 
         } catch (Throwable $e) {
@@ -81,18 +82,18 @@ class GallonTypeController extends Controller
 
     }
 
-    private function updateGallonTypesFunction(Request $req)
+    private function updateGallonTypesFunction(Request $request)
     {
         try {
-            $getGallonType = GallonType::where('gallon_size', $req->size)->first();
+            $getGallonType = GallonType::where('gallon_size', $request->size)->first();
 
             if($getGallonType){
                 $getGallonTypeID = GallonType::where('id', $getGallonType->id)->first();
                 $getGallonTypeID->update([
-                    "gallon_details" => $req->details,
-                    "gallon_size" => $req->updateSize,
-                    "price" => $req->price,
-                    "delivery_fee" => $req->fee
+                    "gallon_details" => $request->details,
+                    "gallon_size" => $request->updateSize,
+                    "price" => $request->price,
+                    "delivery_fee" => $request->fee
                 ]);
 
                 return response($this->response(200, 'Successfully Updated!'));
@@ -104,10 +105,10 @@ class GallonTypeController extends Controller
         }
     }
 
-    private function deleteGallonTypeFuntion(Request $req)
+    private function deleteGallonTypeFuntion(Request $request)
     {
         try {
-            $getGallonTypes = GallonType::where('id', $req->id)->first();
+            $getGallonTypes = GallonType::where('id', $request->id)->first();
 
             if($getGallonTypes){
                 $getGallonTypes->update([

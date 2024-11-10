@@ -17,3 +17,13 @@
 .primary-border-clr {
     border-color: #094b76;
 }
+
+.app-shadow {
+    box-shadow: rgba(90, 114, 123, 0.11) 0px 7px 30px 0px;
+}
+
+.disabled {
+    color: #a1a1a1;
+    cursor: not-allowed;
+    pointer-events: none;
+}

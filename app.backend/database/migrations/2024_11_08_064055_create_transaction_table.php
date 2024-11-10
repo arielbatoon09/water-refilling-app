@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('refills', function (Blueprint $table) {
+        Schema::create('transaction', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->unsigned();
-            $table->json('gallon_details');
-            $table->string('delivery_type');
+            $table->string('details');
             $table->string('mop');
-            $table->string('delivery_date');
-            $table->integer('t_refill_fee');
-            $table->integer('t_delivery_fee');
+            $table->integer('amount');
             $table->string('status');
             $table->timestamps();
         });
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('table_refilling');
+        Schema::dropIfExists('transaction');
     }
 };
