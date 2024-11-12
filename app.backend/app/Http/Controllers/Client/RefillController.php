@@ -41,6 +41,11 @@ class RefillController extends Controller
         return $this->cancelOrderFunction($id);
     }
 
+    public function completeOrder($id)
+    {
+        return $this->completeOrderFunction($id);
+    }
+
     private function getRefillsByUIDFunction()
     {
         try {
@@ -190,7 +195,7 @@ class RefillController extends Controller
             $response = Http::withHeaders([
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
-                    'Authorization' => 'Basic c2tfdGVzdF9KeDd3TjhWSjlrV2MzcThxenJXQzZnc1M6R2Vyd2F5bmUxMjMj',
+                    'Authorization' => "Basic " . env("PAYMONGO_SKEY")
                 ])
                 ->post('https://api.paymongo.com/v1/checkout_sessions', $requestData);
             
@@ -247,6 +252,29 @@ class RefillController extends Controller
                 'status' => 200,
                 'source' => 'RefillController',
                 'message' => 'Cancelled Refill Status',
+            ]);
+
+        } catch (Throwable $th) {
+            return response([
+                'status' => 501,
+                'source' => 'RefillController',
+                'message' => 'Error: ' . $th->getMessage(),
+            ], 501);
+        }
+    }
+
+    private function completeOrderFunction($id)
+    {
+        try {
+            $refill = Refill::where('id', $id)->first();
+            $refill->update([
+                'status' => 'Completed Order'
+            ]);
+
+            return response([
+                'status' => 200,
+                'source' => 'RefillController',
+                'message' => 'Completed Refill Status',
             ]);
 
         } catch (Throwable $th) {

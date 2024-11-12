@@ -7,10 +7,11 @@ use App\Http\Controllers\Admin\GallonTypeController as GallonType;
 use App\Http\Controllers\Admin\RefillController as AdminRefill;
 use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
 use App\Http\Controllers\Client\RefillController as Refill;
-use App\Http\Controllers\Global\ItemsController as globalItems;
-use App\Http\Controllers\Client\OrderCartController as order;
-use App\Http\Controllers\Global\ProductController as products;
-use App\Http\Controllers\Client\OrderCheckoutController as checkout;
+use App\Http\Controllers\Global\ItemsController as GlobalItems;
+use App\Http\Controllers\Client\CartController as Cart;
+use App\Http\Controllers\Global\ProductController as Products;
+use App\Http\Controllers\Client\OrdersController as Checkout;
+use App\Http\Controllers\Client\ReviewController as Review;
 
 // Global Access
 Route::post('/register', [AuthController::class, 'register']);
@@ -34,20 +35,30 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/pay-refills', [Refill::class, 'payRefillOrder']);
     Route::post('/paid-refill', [Refill::class, 'paidRefillOrder']);
     Route::post('/cancel-refill/{id}', [Refill::class, 'cancelOrder']);
+    Route::post('/complete-refill/{id}', [Refill::class, 'completeOrder']);
 
     Route::post('/add-item-inventory', [ItemInventory::class, 'addItemInventory']);
     Route::get('/get-item-inventory', [ItemInventory::class, 'getAllItemInventory']);
     Route::post('/update-item-inventory', [ItemInventory::class, 'updateItemInventory']);
     Route::post('/delete-item-inventory/{id}', [ItemInventory::class, 'deleteItemInventory']);
     
-    Route::get('/get-products', [products::class, 'getProducts']);
-    Route::get('/get-products-by-pid/{id}', [products::class, 'selectedProduct']);
-    Route::post('/add-product', [products::class, 'addProductItem']);
-    Route::post('/update-product/{id}', [products::class, 'updateProduct']);
+    Route::get('/get-products', [Products::class, 'getProducts']);
+    Route::get('/get-products-by-pid/{id}', [Products::class, 'selectedProduct']);
+    Route::post('/add-product', [Products::class, 'addProductItem']);
+    Route::post('/update-product/{id}', [Products::class, 'updateProduct']);
 
-    Route::get('/browser-items', [globalItems::class, 'getAllItem']);
-    Route::post('/add-to-cart', [order::class, 'addToCart']);
-    Route::post('/remove-to-cart/{id}', [order::class, 'removeOrderToCart']);
+    Route::get('/browser-items', [GlobalItems::class, 'getAllItem']);
+    Route::post('/add-to-cart', [Cart::class, 'addToCart']);
+    Route::get('/get-uid-cart', [Cart::class, 'getAllUIDCart']);
+    Route::post('/update-cart-qty', [Cart::class, 'updateCartOrderQuantity']);
+    Route::post('/remove-to-cart/{id}', [Cart::class, 'removeOrderToCart']);
 
-    Route::post('/checkout', [checkout::class, 'checkout']);
+    Route::post('/checkout', [Checkout::class, 'checkout']);
+    Route::post('/checkout/pay-now', [Checkout::class, 'generatePayNow']);
+    Route::post('/checkout/paid', [Checkout::class, 'updateOrderStatus']);
+    Route::post('/checkout/remove/{id}', [Checkout::class, 'removeOrderByCartId']);
+    Route::get('/get-orders-uid', [Checkout::class, 'getOrdersUID']);
+
+    Route::post('/add-review', [Review::class, 'addReview']);
+
 });

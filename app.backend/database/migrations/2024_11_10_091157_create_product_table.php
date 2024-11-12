@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('image_url');
             $table->string('item_name');
             $table->string('item_description');
-            $table->string('item_stocks');
+            $table->integer('item_stocks');
             $table->integer('item_price');
             $table->integer('flag');
             $table->timestamps();

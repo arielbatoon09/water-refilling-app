@@ -54,6 +54,23 @@ const cancelRefill = async (id) => {
   }
 }
 
+const completeRefill = async (id) => {
+  const result = await Swal.fire({
+    title: 'Refill Complete',
+    text: 'Is the water refill completed?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Confirm',
+    cancelButtonText: 'Cancel',
+  });
+
+  if (result.isConfirmed) {
+    const response = await refillStore.completeRefill(id);
+    renderRefillData();
+    console.log(response);
+  }
+}
+
 onMounted(() => {
   renderRefillData();
   EventBus.on('refillUpdated', renderRefillData);
@@ -63,7 +80,7 @@ onMounted(() => {
 
 <template>
   <DashboardLayout>
-    <div class="pt-4 lg:pt-8 lg:px-40 pb-10">
+    <div class="pt-4 lg:pt-8 lg:px-24 2xl:px-40 pb-10">
       <!-- Page Header -->
       <div class="flex items-center gap-2 mb-6">
         <svg class="w-[38px] h-[38px] text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -75,7 +92,7 @@ onMounted(() => {
       </div>
 
       <!-- Filter Section -->
-      <div class="flex w-full flex-col-reverse lg:flex-row gap-3 justify-between">
+      <!-- <div class="flex w-full flex-col-reverse lg:flex-row gap-3 justify-between">
         <div class="w-full xl:w-1/6">
           <select class="select select-bordered w-full">
             <option disabled selected>Filter sales</option>
@@ -84,7 +101,6 @@ onMounted(() => {
           </select>
         </div>
 
-        <!-- Search -->
         <div class="flex items-center w-full lg:w-1/4">
           <input type="text" placeholder="Search..."
             class="px-4 py-[0.68rem] outline-none rounded-l-lg w-full border" />
@@ -96,10 +112,9 @@ onMounted(() => {
             </svg>
           </button>
         </div>
+      </div> -->
 
-      </div>
-
-      <div class="divider"></div>
+      <!-- <div class="divider"></div> -->
 
       <!-- Main Refill List -->
       <div class="space-y-7">
@@ -116,6 +131,19 @@ onMounted(() => {
         <dialog id="bookDelivery" class="modal">
           <BookDeliveryModal />
         </dialog>
+
+        <!-- Notice for Walk-In -->
+        <div class="mt-5 mb-7 flex items-center gap-2 bg-[#56a7dc] rounded py-2 px-3">
+          <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
+            height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M12 13V8m0 8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+          <span class="text-white">Walk-In Delivery should visit to <a class="font-medium hover:underline"
+              target="_blank"
+              href="https://www.google.com/maps/place/Alexa+Water+Refilling+Station/@10.2547228,123.9449681,980m/data=!3m2!1e3!4b1!4m6!3m5!1s0x33a99bbbfa5944d9:0xa7c9355a5c134578!8m2!3d10.2547228!4d123.947543!16s%2Fg%2F11j5lbq8lp?entry=ttu&g_ep=EgoyMDI0MTEwNi4wIKXMDSoASAFQAw%3D%3D">Alexa
+              Water Refilling Station.</a></span>
+        </div>
 
         <!-- Refill List -->
         <div class="grid lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-5">
@@ -146,8 +174,16 @@ onMounted(() => {
                   </div>
 
                   <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                    <li :class="{ 'disabled': data.status !== 'Pending Payment' }" @click="payRefillNow(data)"><a>Pay
-                        Now</a></li>
+                    <li v-if="data.status === 'Pending Payment'"
+                      :class="{ 'disabled': data.status !== 'Pending Payment' }" @click="payRefillNow(data)">
+                      <a>Pay Now</a>
+                    </li>
+
+                    <li v-if="data.status === 'Waiting Delivery' || data.status === 'Visit Shop'"
+                      :class="{ 'disabled': data.status === 'Completed' }" @click="completeRefill(data.id)">
+                      <a>Complete Order</a>
+                    </li>
+
                     <li :class="{ 'disabled': data.status !== 'Pending Payment' }" @click="cancelRefill(data.id)">
                       <a>Cancel Order</a>
                     </li>
@@ -172,14 +208,14 @@ onMounted(() => {
               </div>
               <div class="border-t">
                 <div class="p-4 flex items-center gap-2">
-                  <span v-if="data.status === 'Pending Payment'"
-                    class="text-base bg-orange-100 px-3 text-center rounded-full text-orange-600">{{ data.status
+                  <span v-if="data.status === 'Pending Payment'" @click="payRefillNow(data)"
+                    class="text-base bg-orange-100 px-3 text-center rounded-full text-orange-600 cursor-pointer hover:bg-orange-200">{{ data.status
                     }}</span>
-                  <span v-if="data.status === 'Waiting Delivery'"
-                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600">{{ data.status
+                  <span v-if="data.status === 'Waiting Delivery'" @click="completeRefill(data.id)"
+                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600 cursor-pointer hover:bg-yellow-200">{{ data.status
                     }}</span>
-                  <span v-if="data.status === 'Visit Shop'"
-                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600">{{ data.status
+                  <span v-if="data.status === 'Visit Shop'" @click="completeRefill(data.id)"
+                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600 cursor-pointer hover:bg-yellow-200">{{ data.status
                     }}</span>
                   <span v-if="data.status === 'Completed Order'"
                     class="text-base bg-green-100 px-3 text-center rounded-full text-green-600">{{ data.status }}</span>

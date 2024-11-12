@@ -2,20 +2,24 @@
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRefillStore } from '@/stores/refill';
+import { useProductStore } from '@/stores/product';
 import Swal from 'sweetalert2';
 
+const productStore = useProductStore();
 const route = useRoute();
 const router = useRouter();
 const refillStore = useRefillStore();
 const source = route.query.source;
-const id = route.query.id;
-const mop = route.query.mop;
-const deliveryType = route.query.deliveryType;
 
 const checkSuccessRefill = async () => {
   if (source === 'refill') {
+    const id = route.query.id;
+    const mop = route.query.mop;
+    const deliveryType = route.query.deliveryType;
+
     const response = await refillStore.paidRefill(id, mop, deliveryType);
     console.log(response);
+
     if (response.status === 200) {
       Swal.fire({
         title: 'Perfect',
@@ -25,8 +29,20 @@ const checkSuccessRefill = async () => {
       });
       router.push('/refill');
     }
-  } else {
-    return;
+  } else if (source === 'shop') {
+    const refid = route.query.refid;
+    const response = await productStore.updateOrderPaid(refid, 'To Receive');
+    console.log(response);
+
+    if (response.status === 200) {
+      Swal.fire({
+        title: 'Perfect',
+        text: 'Paid via online successfully!',
+        icon: 'success',
+        confirmButtonText: 'Confirm'
+      });
+      router.push('/purchase');
+    }
   }
 };
 

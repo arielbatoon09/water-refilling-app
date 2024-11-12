@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useProductStore } from '@/stores/product';
 import AdminLayout from '@/components/AdminLayout.vue';
 import NewProductModal from '@/components/NewProductModal.vue';
+import EventBus from '@/js/EventBus';
 
 const products = ref({});
 
@@ -19,10 +20,11 @@ const performSearch = () => {
 const renderProductData = async () => {
   const response = await productStore.getProducts();
   return products.value = response.data;
-}
+};
 
 onMounted(() => {
   renderProductData();
+  EventBus.on('inventoryUpdated', renderProductData);
 });
 </script>
 
@@ -72,27 +74,27 @@ onMounted(() => {
         <table class="min-w-full bg-white text-left">
           <thead>
             <tr class="border-b border-gray-200">
-              <th class="py-2 px-4 w-16">Item ID</th>
-              <th class="py-2 px-4 w-20">Image</th>
-              <th class="py-2 px-4">Product Name</th>
-              <th class="py-2 px-4">Product Description</th>
-              <th class="py-2 px-4">Stock</th>
-              <th class="py-2 px-4">Cost</th>
-              <th class="py-2 px-4">Status</th>
-              <th class="py-2 px-4">Action</th>
+              <th class="py-2 px-4 w-16 text-center">Item ID</th>
+              <th class="py-2 px-4 w-20 text-center">Image</th>
+              <th class="py-2 px-4 text-center">Product Name</th>
+              <th class="py-2 px-4 text-center">Product Description</th>
+              <th class="py-2 px-4 text-center">Stock</th>
+              <th class="py-2 px-4 text-center">Cost</th>
+              <th class="py-2 px-4 text-center">Status</th>
+              <th class="py-2 px-4 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(product, index) in products" :key="product.id">
-              <td class="py-4 px-10">{{ index+1 }}</td>
-              <td class="py-4 px-4 w-20">
+              <td class="py-4 px-10 text-center">{{ index+1 }}</td>
+              <td class="py-4 px-4 w-20 text-center">
                 <img :src="product.image_url" />
               </td>
-              <td class="py-4 px-4">{{ product.item_name }}</td>
-              <td class="py-4 px-4">{{ product.item_description }}</td>
-              <td class="py-4 px-4">{{ product.item_stocks }}</td>
-              <td class="py-4 px-4">{{ product.item_price }}</td>
-              <td class="py-4 px-4">
+              <td class="py-4 px-4 text-center">{{ product.item_name }}</td>
+              <td class="py-4 px-4 text-center">{{ product.item_description }}</td>
+              <td class="py-4 px-4 text-center">{{ product.item_stocks }}</td>
+              <td class="py-4 px-4 text-center">{{ product.item_price }}</td>
+              <td class="py-4 px-4 text-center">
                 <span :class="[ 
                   'p-2 rounded', 
                   product.item_stocks >= 50 ? 'bg-green-200 text-green-700 whitespace-nowrap' : '', 
@@ -102,20 +104,16 @@ onMounted(() => {
                   {{ product.item_stocks >= 50 ? 'High Stock' : 'Low Stock' }}
                 </span>
               </td>
-              <td class="py-4 px-3  dropdown dropdown-end">
-                <button class="btn btn-ghost" tabindex="0" role="button">
+              <td class="py-4 px-3 text-center">
+                <button class="btn btn-ghost">
                   <svg class="w-[24px] h-[24px] text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                     width="24" height="24" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
                       d="M6 12h.01m6 0h.01m5.99 0h.01" />
                   </svg>
                 </button>
-
-                <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                  <li><a class="">Update Product</a></li>
-                </ul>
               </td>
-              
+
             </tr>
           </tbody>
         </table>

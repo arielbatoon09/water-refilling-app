@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useGallonStore } from '@/stores/gallons';
 import Swal from 'sweetalert2';
 import EventBus from '@/js/EventBus';

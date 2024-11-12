@@ -120,7 +120,7 @@ const navigateTo = (route) => {
             <span>{{ link.name }}</span>
           </li>
 
-          <li class="text-gray-500 px-4 pt-4 pb-2.5 border-t font-medium">Other</li>
+          <!-- <li class="text-gray-500 px-4 pt-4 pb-2.5 border-t font-medium">Other</li>
           <li @click="navigateTo('/admin/settings')"
             class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
             :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.name === 'Account Settings' }">
@@ -143,7 +143,7 @@ const navigateTo = (route) => {
                 d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3.05A2.5 2.5 0 1 1 9 5.5M19.5 17h.5a1 1 0 0 0 1-1 3 3 0 0 0-3-3h-1m0-3.05a2.5 2.5 0 1 0-2-4.45m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3 1 1 0 0 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
             </svg>
             <span>Other 2</span>
-          </li>
+          </li> -->
         </ul>
       </nav>
 

@@ -11,16 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_checkouts', function (Blueprint $table) {
+        Schema::create('cart', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->unsigned();
-            $table->integer('cart_id')->unsigned();
-            $table->integer('total_price');
-            $table->string('shipping_address');
-            $table->string('billing_address');
-            $table->string('mop');
-            $table->string('payment_status');
-            $table->string('order_status');
+            $table->integer('product_id');
+            $table->integer('order_quantity');
+            $table->integer('unit_price');
+            $table->integer('flag');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('order_checkout');
+        Schema::dropIfExists('cart');
     }
 };

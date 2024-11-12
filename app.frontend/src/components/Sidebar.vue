@@ -11,9 +11,9 @@ const sidebarStore = useSidebarStore();
 const navLinks = ref([
   { name: 'Dashboard', route: '/admin/dashboard' },
   { name: 'Gallon Type', route: '/admin/gallon' },
+  { name: 'Inventory', route: '/admin/inventory' },
   { name: 'Manage Refill', route: '/admin/refill' },
   { name: 'Delivery', route: '/admin/delivery' },
-  { name: 'Inventory', route: '/admin/inventory' },
   { name: 'Sales', route: '/admin/sales' },
   { name: 'Feedback', route: '/admin/feedback' },
 ]);

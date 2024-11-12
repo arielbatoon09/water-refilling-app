@@ -1,3 +1,19 @@
 Book Delivery Transaction Flow:
 if COD Payment: Waiting Delivery -> Customer Will Pay -> Completed Order
 if Online Payment (Gcash/Maya): Pending Payment -> Waiting Delivery -> Completed Order
+
+
+For Image Storage in Backend
+php artisan storage:link 
+
+
+
+// E-Commerce Flow of Status
+if walk-in and cod
+Visit Shop -> Pay COD -> Get the Items1
+
+if door-to-door and cod
+Wait delivery -> Pay COD -> Get the Items
+
+if door-to-door and online payment
+Pay Online -> Wait Delivery -> Get the Items

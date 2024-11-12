@@ -6,6 +6,8 @@ import EventBus from '@/js/EventBus';
 
 const productStore = useProductStore();
 const errorIndicator = ref(false);
+const errorMsg = ref(null);
+const closeModal = ref(null);
 
 const FormData = ref({
   product_name: null,
@@ -15,25 +17,32 @@ const FormData = ref({
   cost: null,
 });
 
-const handleImage = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    FormData.value.product_image  = file.name;
-  } else {
-    FormData.value.product_image  = null;
-    productImagePreview.value = null;
-  }
-};
-
 const addNewProduct = async () => {
   const response = await productStore.addProduct(FormData.value);
+  console.log(response);
 
-  if(response.status === 200){
+  if (response.status === 200) {
+    Swal.fire({
+      title: 'Perfect!',
+      text: response.message,
+      icon: 'success',
+      confirmButtonText: 'Confirm'
+    });
+
+    // Clear fields
     FormData.value.product_name = null;
     FormData.value.stock = null;
     FormData.value.product_image = null;
     FormData.value.description = null;
-    FormData.value.cost = null;
+    errorIndicator.cost = false;
+    errorMsg.value = null;
+
+    closeModal.value.click();
+
+    EventBus.emit('inventoryUpdated');
+  } else {
+    errorIndicator.value = true;
+    errorMsg.value = response.message;
   }
 
 }
@@ -50,7 +59,6 @@ const uploadImage = (event) => {
 
   reader.readAsDataURL(file);
 };
-
 
 </script>
 

@@ -15,6 +15,7 @@ const slideState = ref(0);
 const no_of_gallon = ref(null);
 const closeModal = ref(null);
 const errorIndicator = ref(false);
+const errorMsg = ref(null);
 
 const FormData = ref({
   gallon_details: [],
@@ -45,12 +46,18 @@ const handleGallonPills = () => {
   if (existingPill) {
     existingPill.no_of_gallon += noOfGallon;
   } else {
-    gallonPills.value.push({
-      gallon_size: selectedGallonOption.value.gallon_size,
-      gallon_each_price: selectedGallonOption.value.gallon_price,
-      gallon_each_dfee: selectedGallonOption.value.delivery_fee,
-      no_of_gallon: noOfGallon
-    });
+    if (gallonPills.value.length < 3) { // Check if limit of 3 is reached
+      gallonPills.value.push({
+        gallon_size: selectedGallonOption.value.gallon_size,
+        gallon_each_price: selectedGallonOption.value.gallon_price,
+        gallon_each_dfee: selectedGallonOption.value.delivery_fee,
+        no_of_gallon: noOfGallon
+      });
+      errorIndicator.value = false;
+    } else {
+      errorIndicator.value = true;
+      errorMsg.value = 'You can only add up to 3 different gallon sizes.';
+    }
   }
 };
 
@@ -93,13 +100,15 @@ const handleBookNow = async () => {
     selectedGallonOption.value = [];
     no_of_gallon.value = null;
     selectedGallonOption.value.gallon_size = 'Select Gallon Size';
+    errorIndicator.value = false;
 
-    closeModal.value.click(); 
+    closeModal.value.click();
 
     // Emit an event to notify other components
     EventBus.emit('refillUpdated');
   } else {
     errorIndicator.value = true;
+    errorMsg.value = 'Make sure fill up the booking details';
   }
 };
 
@@ -137,15 +146,14 @@ onMounted(() => {
             stroke="#e86868" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
         </g>
       </svg>
-      Error: Make sure fill up the booking details.
+      Error: {{ errorMsg }}
     </p>
 
     <!-- Delivery Data Fields -->
     <div class="w-full">
       <!-- Gallon Sizes & Quanity Pills -->
       <div class="mt-4 flex flex-wrap gap-2]" v-if="gallonPills.length > 0">
-        <div v-for="(pill, index) in gallonPills" :key="index"
-          class="badge bg-gray-200 hover:bg-gray-300 cursor-pointer py-3 gap-2">
+        <div v-for="(pill, index) in gallonPills" :key="index" class="badge bg-gray-200 hover:bg-gray-300 cursor-pointer py-3 gap-2 mr-1 mb-1">
           <svg @click="removeGallonPills(index)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
             class="inline-block h-4 w-4 stroke-current cursor-pointer">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>

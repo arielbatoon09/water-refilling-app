@@ -75,5 +75,15 @@ export const useRefillStore = defineStore('refill', {
       }
     },
 
+    async completeRefill(id) {
+      try {
+        await this.getToken();
+        const response = await axios.post(`/api/complete-refill/${id}`);
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
   },
 });
