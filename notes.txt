@@ -4,7 +4,13 @@ if Online Payment (Gcash/Maya): Pending Payment -> Waiting Delivery -> Completed
 
 
 For Image Storage in Backend
-php artisan storage:link 
+php artisan storage:link
+
+Frontend
+npm run dev
+
+Backend
+php artisan serve
 
 
 
