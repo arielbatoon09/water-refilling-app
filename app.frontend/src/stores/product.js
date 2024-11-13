@@ -34,8 +34,7 @@ export const useProductStore = defineStore('product', {
       try {
         await this.getToken();
         const response = await axios.get(`/api/get-products-by-pid/${id}`);
-        // return response.data;
-        console.log(response.data);
+        return response.data;
       } catch (error) {
         console.error(error);
       }
@@ -44,14 +43,24 @@ export const useProductStore = defineStore('product', {
     async updateProducts(FormData) {
       try {
         await this.getToken();
-        const response = await axios.post(`/api/update-product/${FormData.product_id}`, {
+        const response = await axios.post(`/api/update-product/${FormData.id}`, {
           product_name: FormData.product_name,
           stock: FormData.stock,
-          // product_image: FormData.product_image,
-          product_image: "http://127.0.0.1:5173/src/assets/inventory/water-galloons.jpg",
+          product_image: FormData.product_image,
           description: FormData.description,
           cost: FormData.cost,
         });
+
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async removeProduct(id){
+      try {
+        await this.getToken();
+        const response = await axios.post(`/api/remove-product/${id}`);
         return response.data;
       } catch (error) {
         console.error(error);

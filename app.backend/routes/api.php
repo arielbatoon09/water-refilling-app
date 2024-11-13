@@ -17,7 +17,6 @@ use App\Http\Controllers\Client\ReviewController as Review;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-
 // Authenticated
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/user', [AuthController::class, 'user']);
@@ -29,6 +28,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/update-gallon-type', [GallonType::class, 'updateGallonTypes']);
     Route::post('/delete-gallon-type/{id}', [GallonType::class, 'deleteGallonType']);
     Route::post('/update-refills', [AdminRefill::class, 'updateRefilling']);
+    Route::get('/get-selected-gallon/{id}', [GallonType::class, 'getSelectedGallon']);
 
     Route::get('/get-refills-by-uid', [Refill::class, 'getRefillsByUID']);
     Route::post('/add-refills', [Refill::class, 'addRefilling']);
@@ -46,6 +46,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/get-products-by-pid/{id}', [Products::class, 'selectedProduct']);
     Route::post('/add-product', [Products::class, 'addProductItem']);
     Route::post('/update-product/{id}', [Products::class, 'updateProduct']);
+    Route::post('/remove-product/{id}', [Products::class, 'removeProduct']);
+    // Route::post('/get-selected-product/{id}', [Products::class, 'getSelectedProduct']);
 
     Route::get('/browser-items', [GlobalItems::class, 'getAllItem']);
     Route::post('/add-to-cart', [Cart::class, 'addToCart']);

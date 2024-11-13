@@ -16,6 +16,38 @@ class GallonTypeController extends Controller
         return $this->getAllGallonTypeFunction();
     }
 
+    public function getSelectedGallon(Request $request){
+        try {
+            $gallonType = GallonType::where('id', $request->id)->where('flag', 1)->first();;
+
+            if ($gallonType) {
+                $gallonData = [
+                    'id' => $gallonType->id,
+                    'gallon_size' => $gallonType->gallon_size,
+                    'gallon_price' => $gallonType->gallon_price,
+                    'delivery_fee' => $gallonType->delivery_fee,
+                    'gallon_image' => $gallonType->gallon_image,
+                    'flag' => $gallonType->flag,
+                    'created_at' => $gallonType->created_at,
+                    'updated_at' => $gallonType->updated_at,
+                ];
+            
+                return response([
+                    'status' => 200,
+                    'source' => 'GallonTypeController',
+                    'data' => $gallonData,
+                ]);
+            } else {
+                return response([
+                    'status' => 404,
+                    'message' => 'Gallon type not found',
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response($this->response(501, $th));
+        }
+    }
+
     public function AddGallonType(Request $request)
     {
         return $this->AddGallonTypeFunction($request);
@@ -138,21 +170,61 @@ class GallonTypeController extends Controller
     private function updateGallonTypesFunction(Request $request)
     {
         try {
-            $getGallonType = GallonType::where('gallon_size', $request->size)->first();
+            $getGallonTypeID = GallonType::where('id', $request->id)->first();
 
-            if($getGallonType){
-                $getGallonTypeID = GallonType::where('id', $getGallonType->id)->first();
-                $getGallonTypeID->update([
-                    "gallon_details" => $request->details,
-                    "gallon_size" => $request->updateSize,
-                    "price" => $request->price,
-                    "delivery_fee" => $request->fee
+            if (!$getGallonTypeID) {
+                return response([
+                    'status' => 404,
+                    'source' => 'GallonTypeController',
+                    'message' => 'Gallon type not found!'
                 ]);
-
-                return response($this->response(200, 'Successfully Updated!'));
-            }else{
-                return response($this->response(409, 'Gallon Size Not Existing in the data!'));
             }
+
+            $validator = Validator::make($request->all(), [
+                'gallon_size' => 'required|string|max:255',
+                'gallon_price' => 'required|numeric',
+                'delivery_fee' => 'required|numeric',
+            ]);
+
+            if ($validator->fails()) {
+                return response([
+                    'status' => 422,
+                    'source' => 'GallonTypeController',
+                    'message' => 'Make sure fill up the booking details.',
+                    'errors' => $validator->errors()
+                ]);
+            }
+
+            $updateData = [
+                "gallon_size" => $request->input('gallon_size'),
+                "gallon_price" => $request->input('gallon_price'),
+                "delivery_fee" => $request->input('delivery_fee')
+            ];
+
+            if ($request->filled('gallon_image')) {
+                $base64Image = $request->input('gallon_image');
+                preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches);
+                $extension = $matches[1] ?? 'png';
+
+                $imageData = substr($base64Image, strpos($base64Image, ',') + 1);
+                $imageData = base64_decode($imageData);
+
+                $randomImageName = 'image-' . Str::random(40) . '.' . $extension;
+                $imagePath = 'gallon/' . $randomImageName;
+
+                Storage::disk('public')->put($imagePath, $imageData);
+
+                $updateData['gallon_image'] = env('APP_URL') . '/storage/' . $imagePath;
+            }
+
+            $getGallonTypeID->update($updateData);
+
+            return response([
+                'status' => 200,
+                'source' => 'GallonTypeController',
+                'message' => 'Successfully Updated!'
+            ]);
+
         } catch (Throwable $th) {
             return response($this->response(501, 'Error in ' .$th));
         }
@@ -165,7 +237,7 @@ class GallonTypeController extends Controller
 
             if($getGallonTypes){
                 $getGallonTypes->update([
-                    'flag' => 1
+                    'flag' => 0
                 ]);
                 return response($this->response(200, 'Removed!'));
             }else{
