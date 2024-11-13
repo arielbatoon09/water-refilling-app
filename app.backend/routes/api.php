@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\GallonTypeController as GallonType;
 use App\Http\Controllers\Admin\RefillController as AdminRefill;
 use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
+use App\Http\Controllers\Admin\UserController as User;
 use App\Http\Controllers\Client\RefillController as Refill;
 use App\Http\Controllers\Global\ItemsController as GlobalItems;
 use App\Http\Controllers\Client\CartController as Cart;
@@ -47,7 +48,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/add-product', [Products::class, 'addProductItem']);
     Route::post('/update-product/{id}', [Products::class, 'updateProduct']);
     Route::post('/remove-product/{id}', [Products::class, 'removeProduct']);
-    // Route::post('/get-selected-product/{id}', [Products::class, 'getSelectedProduct']);
 
     Route::get('/browser-items', [GlobalItems::class, 'getAllItem']);
     Route::post('/add-to-cart', [Cart::class, 'addToCart']);
@@ -62,5 +62,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/get-orders-uid', [Checkout::class, 'getOrdersUID']);
 
     Route::post('/add-review', [Review::class, 'addReview']);
+
+    Route::get('/get-all-user', [User::class, 'getAllUser']);
+    Route::get('/get-user-by-uid/{id}', [User::class, 'getUserById']);
+    Route::post('/remove-user/{id}', [User::class, 'removeUser']);
+    Route::post('/update-user', [User::class, 'updateUser']);
 
 });
