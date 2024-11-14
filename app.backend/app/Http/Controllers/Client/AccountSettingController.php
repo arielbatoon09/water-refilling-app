@@ -44,6 +44,7 @@ class AccountSettingController extends Controller
                 "municipality" => $request->municipality,
                 "city" => $request->city,
                 "postal_code" => $request->postalCode,
+                "phone_number" => $request->phone_number,
             ]);
 
             if($result){
@@ -166,6 +167,7 @@ class AccountSettingController extends Controller
                     'municipality' => $request->municipality,
                     'city' => $request->city,
                     'postal_code' => $request->postalCode,
+                    'phone_number' => $request->phone_number,
                 ]);
                 
                 return response([
@@ -180,6 +182,7 @@ class AccountSettingController extends Controller
                     'municipality' => $request->municipality,
                     'city' => $request->city,
                     'postal_code' => $request->postalCode,
+                    'phone_number' => $request->phone_number,
                 ]);
                 
                 return response([

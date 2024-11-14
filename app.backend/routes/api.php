@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\GallonTypeController as GallonType;
 use App\Http\Controllers\Admin\RefillController as AdminRefill;
 use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
+use App\Http\Controllers\Admin\OrderController as AdminOrder;
 use App\Http\Controllers\Admin\UserController as User;
 use App\Http\Controllers\Client\RefillController as Refill;
 use App\Http\Controllers\Client\AccountSettingController as Account;
@@ -31,7 +32,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/delete-gallon-type/{id}', [GallonType::class, 'deleteGallonType']);
     Route::post('/update-refills', [AdminRefill::class, 'updateRefilling']);
     Route::get('/get-all-refills', [AdminRefill::class, 'getAllRefills']);
+    Route::post('/change-refills-delivered/{id}', [AdminRefill::class, 'changeToDelivered']);
     Route::get('/get-selected-gallon/{id}', [GallonType::class, 'getSelectedGallon']);
+
+    Route::get('/get-all-orders', [AdminOrder::class, 'getAllOrder']);
+    Route::post('/update-orders/{id}', [AdminOrder::class, 'updateStatus']);
 
     Route::get('/get-refills-by-uid', [Refill::class, 'getRefillsByUID']);
     Route::post('/add-refills', [Refill::class, 'addRefilling']);

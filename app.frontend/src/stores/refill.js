@@ -93,6 +93,16 @@ export const useRefillStore = defineStore('refill', {
       } catch (error) {
         console.error(error);
       }
+    },
+
+    async changeStatus (id){
+      try {
+        await this.getToken();
+        const response = await axios.post('/api/change-refills-delivered/' + id);
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
     }
 
   },

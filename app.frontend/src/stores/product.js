@@ -188,7 +188,29 @@ export const useProductStore = defineStore('product', {
       } catch (error) {
         console.error(error);
       }
-    }
+    },
+
+    async getAllOrder(){
+      try {
+        await this.getToken();
+        const response = await axios.get('/api/get-all-orders');
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async updateAllOrder(id){
+      try {
+        await this.getToken();
+        const response = await axios.post('/api/update-orders/' + id);
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+
 
   },
 });

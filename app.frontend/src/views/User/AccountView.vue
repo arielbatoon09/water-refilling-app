@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 const basicInfoData = ref({
   name: null,  
   email: null,
+  phone_number: null,
   addressLine: null,
   municipality: null,
   city: null,
@@ -38,6 +39,7 @@ const renderAddressInfo = async () => {
     basicInfoData.value.addressLine = data.address;
     basicInfoData.value.municipality = data.municipality;
     basicInfoData.value.city = data.city;
+    basicInfoData.value.phone_number = data.phone_number;
     basicInfoData.value.postalCode = data.postal_code;
   } catch (error) {
     console.log('Error in ' + error);
@@ -53,6 +55,7 @@ const changeInformation = async () => {
       municipality: basicInfoData.value.municipality,
       city: basicInfoData.value.city,
       postalCode: basicInfoData.value.postalCode,
+      phone_number: basicInfoData.value.phone_number,
     };
 
     const response = await usersStore.changeUserInformation(userInfo);
@@ -71,6 +74,7 @@ const addAddress = async () => {
       municipality: basicInfoData.value.municipality,
       city: basicInfoData.value.city,
       postalCode: basicInfoData.value.postalCode,
+      phone_number: basicInfoData.value.phone_number
     };
 
     await usersStore.addUserAddress(userInfo);
@@ -88,9 +92,11 @@ const changeAddress = async () => {
       municipality: basicInfoData.value.municipality,
       city: basicInfoData.value.city,
       postalCode: basicInfoData.value.postalCode,
+      phone_number: basicInfoData.value.phone_number,
     };
 
     await usersStore.changeUserAddresss(userInfo);
+
   } catch (error) {
     console.log('Error in ' + error);
   }
@@ -104,6 +110,7 @@ const saveChanges = async () => {
     municipality: basicInfoData.value.municipality,
     city: basicInfoData.value.city,
     postalCode: basicInfoData.value.postalCode,
+    phone_number: basicInfoData.value.phone_number,
   };
 
   changeInformation(userInfo);
@@ -124,14 +131,9 @@ const changePassword = async () => {
     confirm_new_password: changePasswordData.value.confirm_new_password
   };
 
-  if(changePasswordData.value.new_password === changePasswordData.value.confirm_new_password){
-    const response = await usersStore.changePassword(DataChangePassword);
-    console.log(response);
-    Swal.fire('success', response.data.message, 'success');
-  }else{
-    alert('Password not match!');
-  }
-
+  const response = await usersStore.changePassword(DataChangePassword);
+  console.log(response);
+  Swal.fire('success', response.data.message, 'success');
 
 }
 
@@ -177,6 +179,14 @@ onMounted(() => {
                   d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
               </svg>
               <input type="text" v-model="basicInfoData.email" class="grow" placeholder="Email" />
+            </label>
+
+            <span class="label-text">What is your phone number?</span>
+            <label class="input mb-1 input-bordered flex items-center gap-2">
+              <svg class="w-[24px] h-[24px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M7.978 4a2.553 2.553 0 0 0-1.926.877C4.233 6.7 3.699 8.751 4.153 10.814c.44 1.995 1.778 3.893 3.456 5.572 1.68 1.679 3.577 3.018 5.57 3.459 2.062.456 4.115-.073 5.94-1.885a2.556 2.556 0 0 0 .001-3.861l-1.21-1.21a2.689 2.689 0 0 0-3.802 0l-.617.618a.806.806 0 0 1-1.14 0l-1.854-1.855a.807.807 0 0 1 0-1.14l.618-.62a2.692 2.692 0 0 0 0-3.803l-1.21-1.211A2.555 2.555 0 0 0 7.978 4Z"/>
+              </svg>
+              <input type="number" v-model="basicInfoData.phone_number" class="grow" placeholder="Enter phone number" />
             </label>
 
             <div class="grid grid-cols-2 gap-4">

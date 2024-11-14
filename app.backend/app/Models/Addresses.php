@@ -14,6 +14,7 @@ class Addresses extends Model
         "municipality",
         "city",
         "postal_code",
+        "phone_number",
     ];
 
     public function User()

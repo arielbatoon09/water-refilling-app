@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Refill;
+use App\Models\Addresses;
 use DateTime;
 use Throwable;
 
@@ -18,6 +19,10 @@ class RefillController extends Controller
             $refillsData = [];
 
             foreach ($getRefillers as $data) {
+                $getAddress = Addresses::where('user_id', $data->user->id)
+                                        ->orderBy('created_at', 'desc')
+                                        ->first();
+
                 $gallonDetails = json_decode($data->gallon_details, true);
                 $filteredGallonDetails = array_map(function ($gallon) {
                     return [
@@ -29,6 +34,8 @@ class RefillController extends Controller
                 $refillsData[] = [
                     'id' => $data->id,
                     'name' => $data->user->name,
+                    'user_role' => $data->user->user_role,
+                    'address' => $getAddress, 
                     "gallon_details" => $filteredGallonDetails,
                     "delivery_type" => $data->delivery_type,
                     "mop" => $data->mop,
@@ -41,6 +48,7 @@ class RefillController extends Controller
                     'updated_at' => $data->updated_at,
                 ];
             }
+
 
             return response([
                 'status' => 200,
@@ -64,6 +72,24 @@ class RefillController extends Controller
             if($getRefill){
                 $getRefill->update([
                     'status' => $req->status
+                ]);
+                
+                return response($this->response(200, 'Sucessfully Updated!'));
+            }else{
+                return response($this->response(409,'This Gallon size is not existing in the data!'));
+            }
+        } catch (Throwable $th) {
+            return response($this->response(501, 'Error in '.$th));
+        }
+    }
+
+    public function changeToDelivered(Request $req){
+        try {
+            $getRefill = Refill::where('id', $req->id)->first();
+
+            if($getRefill){
+                $getRefill->update([
+                    'status' => 'Delivered'
                 ]);
                 
                 return response($this->response(200, 'Sucessfully Updated!'));

@@ -95,6 +95,7 @@ export const useUsersStore = defineStore('user', {
           municipality: FormData.municipality,
           city: FormData.city,
           postalCode: FormData.postalCode,
+          phone_number: FormData.phone_number,
         });
         return response;
       } catch (error) {
@@ -111,6 +112,7 @@ export const useUsersStore = defineStore('user', {
           municipality: FormData.municipality,
           city: FormData.city,
           postalCode: FormData.postalCode,
+          phone_number: FormData.phone_number,
         });
         return response;
       } catch (error) {

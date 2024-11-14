@@ -125,6 +125,8 @@ class RefillController extends Controller
                 $status = 'Waiting Delivery';
             } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'COD') {
                 $status = 'Visit Shop';
+            } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'Over-The-Counter') {
+                $status = 'Completed Order';
             } else {
                 $status = 'Pending Payment';
             }
