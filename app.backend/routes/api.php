@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\RefillController as AdminRefill;
 use App\Http\Controllers\Admin\ItemInventoryController as ItemInventory;
 use App\Http\Controllers\Admin\UserController as User;
 use App\Http\Controllers\Client\RefillController as Refill;
+use App\Http\Controllers\Client\AccountSettingController as Account;
 use App\Http\Controllers\Global\ItemsController as GlobalItems;
 use App\Http\Controllers\Client\CartController as Cart;
 use App\Http\Controllers\Global\ProductController as Products;
@@ -29,6 +30,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/update-gallon-type', [GallonType::class, 'updateGallonTypes']);
     Route::post('/delete-gallon-type/{id}', [GallonType::class, 'deleteGallonType']);
     Route::post('/update-refills', [AdminRefill::class, 'updateRefilling']);
+    Route::get('/get-all-refills', [AdminRefill::class, 'getAllRefills']);
     Route::get('/get-selected-gallon/{id}', [GallonType::class, 'getSelectedGallon']);
 
     Route::get('/get-refills-by-uid', [Refill::class, 'getRefillsByUID']);
@@ -68,4 +70,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/remove-user/{id}', [User::class, 'removeUser']);
     Route::post('/update-user', [User::class, 'updateUser']);
 
+    Route::get('/get-user-info',[Account::class, 'getUserInformation']);
+    Route::get('/get-user-address',[Account::class, 'getAddressInformation']);
+    Route::post('/add-user-address',[Account::class, 'addUserAddress']);
+    Route::post('/change-user-info',[Account::class, 'updateUserInfo']);
+    Route::post('/change-user-password',[Account::class, 'changePassword']);
+    Route::post('/change-user-info',[Account::class, 'updateUserInfo']);
+    Route::post('/change-user-address',[Account::class, 'changeAddress']);
 });

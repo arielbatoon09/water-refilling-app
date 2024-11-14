@@ -1,38 +1,32 @@
 <script setup>
 import AdminLayout from '@/components/AdminLayout.vue';
-import { ref, computed } from 'vue';
+import { useRefillStore } from '@/stores/refill';
+import { ref, computed, onMounted } from 'vue';
 
-const orders = ref([
-  { id: 1, status: 'Completed', customer: 'John Doe', order: 'Empty Galoons', orderType: 'Delivery', mop: 'Over-The-Counter', cost: '₱100.00' },
-  { id: 2, status: 'Pending', customer: 'Jane Smith', order: '2pcs Refill Galoons', orderType: 'Walk-In', mop: 'G-Cash ', cost: '₱150.00' },
-  { id: 3, status: 'Cancelled', customer: 'Mike Johnson', order: 'Galoon Cover', orderType: 'Walk-In', mop: 'G-Cash', cost: '₱200.00' },
-  { id: 4, status: 'Reviewed', customer: 'Chris Lee', order: '1pcs Refill Galoon', orderType: 'Walk-In', mop: 'PayMaya', cost: '₱250.00' },
-  { id: 5, status: 'Reviewed', customer: 'Sara Wilson', order: 'Galoon Cover Seal', orderType: 'Walk-In', mop: 'Over the counter', cost: '₱300.00' },
-]);
-
+const refills = ref([]);
+const refillStore = useRefillStore();
 const searchQuery = ref('');
 const searchInput = ref('');
-const currentTab = ref('All Orders');
+const currentTab = ref('All refills');
 const currentPage = ref(1);
 const itemsPerPage = 4;
 
-const tabs = ['All Orders', 'Completed', 'Pending', 'Cancelled', 'Reviewed'];
+const tabs = ['All refills', 'Completed', 'Pending', 'Cancelled', 'Reviewed'];
 
-// Trigger search when button is clicked
 const performSearch = () => {
   searchQuery.value = searchInput.value;
 };
 
-const filteredOrders = computed(() => {
-  let filtered = orders.value;
+const filteredrefills = computed(() => {
+  let filtered = refills.value;
 
-  if (currentTab.value !== 'All Orders') {
-    filtered = filtered.filter(order => order.status === currentTab.value);
+  if (currentTab.value !== 'All refills') {
+    filtered = filtered.filter(Refill => Refill.status === currentTab.value);
   }
 
   if (searchQuery.value) {
-    filtered = filtered.filter(order =>
-      order.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
+    filtered = filtered.filter(Refill =>
+      Refill.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   }
 
@@ -42,15 +36,15 @@ const filteredOrders = computed(() => {
 });
 
 const totalPages = computed(() => {
-  let filtered = orders.value;
+  let filtered = refills.value;
 
-  if (currentTab.value !== 'All Orders') {
-    filtered = filtered.filter(order => order.status === currentTab.value);
+  if (currentTab.value !== 'All refills') {
+    filtered = filtered.filter(Refill => Refill.status === currentTab.value);
   }
 
   if (searchQuery.value) {
-    filtered = filtered.filter(order =>
-      order.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
+    filtered = filtered.filter(Refill =>
+      Refill.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   }
 
@@ -68,12 +62,25 @@ const nextPage = () => {
     currentPage.value++;
   }
 };
+
+const getAllRefills = async () => {
+  try {
+    const response = await refillStore.getAllRefill();
+    refills.value = response.data;
+  } catch (error) {
+    console.log('Error in ' + error);
+  }
+}
+
+onMounted(() => {
+  getAllRefills();
+});
 </script>
 
 <template>
   <AdminLayout>
     <div class="mx-auto mt-10">
-      <!-- Add Order Button -->
+      <!-- Add Refill Button -->
       <button class="btn primary-btn-bg text-white">
         <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
           height="24" fill="none" viewBox="0 0 24 24">
@@ -83,7 +90,7 @@ const nextPage = () => {
         Manual Refill
       </button>
       
-      <!-- Add Order & Search Button -->
+      <!-- Add Refill & Search Button -->
       <div class="mb-4 mt-7 flex flex-wrap gap-4 justify-between">
         <!-- Filter Tabs -->
         <div class="space-x-2 overflow-x-auto flex flex-nowrap">
@@ -110,34 +117,39 @@ const nextPage = () => {
       <div class="overflow-x-auto w-100">
         <table class="min-w-full bg-white text-left">
           <thead>
-            <tr class="border-b border-gray-200">
-              <th class="py-2 px-4 w-14 whitespace-nowrap">Order ID</th>
+            <tr class="bRefill-b bRefill-gray-200">
+              <th class="py-2 px-4 w-14 whitespace-nowrap">Refill ID</th>
               <th class="py-2 px-10">Customer</th>
-              <th class="py-2 px-4">Order</th>
-              <th class="py-2 px-4">Order Type</th>
+              <th class="py-2 px-4">Refill Details</th>
+              <th class="py-2 px-4">Refill Type</th>
               <th class="py-2 px-4">Payment Method</th>
-              <th class="py-2 px-4">Cost</th>
+              <th class="py-2 px-4">Total Fee</th>
               <th class="py-2 px-4">Status</th>
               <th class="py-2 px-1">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="order in filteredOrders" :key="order.id">
-              <td class="py-4 px-10">{{ order.id }}</td>
-              <td class="py-4 px-10">{{ order.customer }}</td>
-              <td class="py-4 px-4">{{ order.order }}</td>
-              <td class="py-4 px-4">{{ order.orderType }}</td>
-              <td class="py-4 px-4">{{ order.mop }}</td>
-              <td class="py-4 px-4">{{ order.cost }}</td>
+            <tr v-for="Refill in filteredrefills" :key="Refill.id">
+              <td class="py-4 px-10">{{ Refill.id }}</td>
+              <td class="py-4 px-10">{{ Refill.name }}</td>
+              <td class="py-4 px-4">
+                <span v-for="(gallon, index) in Refill.gallon_details" :key="index">
+                  {{ gallon.gallon_size }} - {{ gallon.no_of_gallon }}
+                  <span v-if="index < Refill.gallon_details.length - 1">, </span>
+                </span>
+              </td>
+              <td class="py-4 px-4">{{ Refill.delivery_type }}</td>
+              <td class="py-4 px-4">{{ Refill.mop }}</td>
+              <td class="py-4 px-4">₱{{ Refill.t_overall_fee }}.00</td>
               <td class="py-4 px-4">
                 <span :class="[
                   'p-2 rounded',
-                  order.status === 'Completed' ? 'bg-green-200 text-green-700' : '',
-                  order.status === 'Pending' ? 'bg-orange-200 text-orange-700' : '',
-                  order.status === 'Cancelled' ? 'bg-red-200 text-red-700' : '',
-                  order.status === 'Reviewed' ? 'bg-yellow-200 text-yellow-700' : ''
+                  Refill.status === 'Completed' ? 'bg-green-200 text-green-700' : '',
+                  Refill.status === 'Pending' ? 'bg-orange-200 text-orange-700' : '',
+                  Refill.status === 'Cancelled' ? 'bg-red-200 text-red-700' : '',
+                  Refill.status === 'Reviewed' ? 'bg-yellow-200 text-yellow-700' : ''
                 ]">
-                  {{ order.status }}
+                  {{ Refill.status }}
                 </span>
               </td>
               <td>

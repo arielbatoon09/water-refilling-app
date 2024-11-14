@@ -17,9 +17,9 @@ class Refill extends Model
         "status",
     ];
 
-    // public function User(){
-    //     return $this->belongsTo(User::class);
-    // }
+    public function User(){
+        return $this->belongsTo(User::class);
+    }
 
     // public function GallonType(){
     //     return $this->belongsTo(GallonType::class, 'gallon_id');

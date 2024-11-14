@@ -120,8 +120,8 @@ const navigateTo = (route) => {
             <span>{{ link.name }}</span>
           </li>
 
-          <!-- <li class="text-gray-500 px-4 pt-4 pb-2.5 border-t font-medium">Other</li>
-          <li @click="navigateTo('/admin/settings')"
+          <li class="text-gray-500 px-4 pt-4 pb-2.5 border-t font-medium">Other</li>
+          <li @click="navigateTo('/account')"
             class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
             :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.name === 'Account Settings' }">
             <svg class="w-[24px] h-[24px] text-gray-700"
@@ -130,10 +130,10 @@ const navigateTo = (route) => {
               <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="1.5"
                 d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
-            <span>Other 1</span>
+            <span>Account Settings</span>
           </li>
 
-          <li @click="navigateTo('/admin/management')"
+          <!-- <li @click="navigateTo('/admin/management')"
             class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
             :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.name === 'User Management' }">
             <svg class="w-[24px] h-[24px] text-gray-700"
