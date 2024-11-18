@@ -1,12 +1,11 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import { useUsersStore } from '@/stores/users';
 import DashboardLayout from '@/components/DashboardLayout.vue';
 import Swal from 'sweetalert2';
 
 const basicInfoData = ref({
-  name: null,  
+  name: null,
   email: null,
   phone_number: null,
   addressLine: null,
@@ -33,16 +32,16 @@ const renderUserInfo = async () => {
 }
 
 const renderAddressInfo = async () => {
-  try {
-    const response = await usersStore.getAddressInformation();
-    const data = response.data;
+  const response = await usersStore.getAddressInformation();
+  const data = response.data;
+  if (response.data) {
     basicInfoData.value.addressLine = data.address;
     basicInfoData.value.municipality = data.municipality;
     basicInfoData.value.city = data.city;
     basicInfoData.value.phone_number = data.phone_number;
     basicInfoData.value.postalCode = data.postal_code;
-  } catch (error) {
-    console.log('Error in ' + error);
+
+    console.log(data);
   }
 }
 
@@ -115,12 +114,12 @@ const saveChanges = async () => {
 
   changeInformation(userInfo);
 
-  if(basicInfoData.value.addressLine == null && basicInfoData.value.municipality == null && basicInfoData.value.city == null && basicInfoData.value.postalCode == null){
+  if (basicInfoData.value.addressLine == null && basicInfoData.value.municipality == null && basicInfoData.value.city == null && basicInfoData.value.postalCode == null) {
     addAddress(userInfo);
-    Swal.fire('success', 'Address successfully added!', 'success');
-  }else{
+    Swal.fire('Success', 'Updated Basic Information Successfully!', 'success');
+  } else {
     changeAddress(userInfo);
-    Swal.fire('success', 'Address Updated!', 'success');
+    Swal.fire('Success', 'Updated Basic Information Successfully!', 'success');
   }
 }
 
@@ -131,9 +130,19 @@ const changePassword = async () => {
     confirm_new_password: changePasswordData.value.confirm_new_password
   };
 
+  if (changePasswordData.value.new_password !== changePasswordData.value.confirm_new_password) {
+    return Swal.fire('Error', 'New Password Mismatch!', 'error');
+  }
+
   const response = await usersStore.changePassword(DataChangePassword);
-  console.log(response);
-  Swal.fire('success', response.data.message, 'success');
+  if (response.status === 200) {
+    changePasswordData.value.current_password = null;
+    changePasswordData.value.new_password = null;
+    changePasswordData.value.confirm_new_password = null;
+    Swal.fire('Success', response.message, 'success');
+  } else {
+    Swal.fire('Error', response.message, 'error');
+  }
 
 }
 
@@ -146,138 +155,98 @@ onMounted(() => {
 <template>
   <DashboardLayout>
     <div class="pt-4 lg:pt-8 lg:px-24 2xl:px-40 pb-10">
-      <div class="flex items-center gap-2 mb-6">
-        <svg class="w-[38px] h-[38px] text-gray-700" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="8" r="4"/>
-          <path d="M12 14c-5.33 0-8 2.67-8 6v1h16v-1c0-3.33-2.67-6-8-6z"/>
+      <div class="flex items-center gap-3 mb-6">
+        <svg class="w-[48px] h-[48px] bg-gray-200 rounded-full p-2 text-gray-700" xmlns="http://www.w3.org/2000/svg"
+          width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M12 14c-5.33 0-8 2.67-8 6v1h16v-1c0-3.33-2.67-6-8-6z" />
         </svg>
-        <h2 class="text-2xl font-semibold text-gray-700">My Account Setting</h2>
+        <div>
+          <h2 class="text-2xl font-semibold text-gray-700">Account Settings</h2>
+          <p class="text-gray-600">Update your information or credentials accordingly.</p>
+        </div>
       </div>
 
       <!-- Basic Information -->
-      <div class="bg-white mt-4 rounded space-y-4 overflow-x-auto">
-        <div class="card border">
-          <div class="card-body">
-            <h2 class="card-title pb-3">Basic Information</h2>
-            <span class="label-text">What is your name?</span>
-            <label class="input mb-1 input-bordered flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 opacity-70">
+      <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 border-b pb-3 mb-5">Basic Information</h2>
+
+        <div class="space-y-4">
+          <!-- Full Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Full Name</label>
+            <div class="relative flex items-center gap-2 rounded border border-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-3 text-gray-500" fill="currentColor" viewBox="0 0 16 16">
                 <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" />
               </svg>
-              <input type="text" v-model="basicInfoData.name" class="grow" placeholder="Enter Name" />
-            </label>
-            <span class="label-text">What is your email?</span>
-            <label class="input mb-1 input-bordered flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                class="h-4 w-4 opacity-70">
-                <path
-                  d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
-                <path
-                  d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
-              </svg>
-              <input type="text" v-model="basicInfoData.email" class="grow" placeholder="Email" />
-            </label>
-
-            <span class="label-text">What is your phone number?</span>
-            <label class="input mb-1 input-bordered flex items-center gap-2">
-              <svg class="w-[24px] h-[24px] text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7.978 4a2.553 2.553 0 0 0-1.926.877C4.233 6.7 3.699 8.751 4.153 10.814c.44 1.995 1.778 3.893 3.456 5.572 1.68 1.679 3.577 3.018 5.57 3.459 2.062.456 4.115-.073 5.94-1.885a2.556 2.556 0 0 0 .001-3.861l-1.21-1.21a2.689 2.689 0 0 0-3.802 0l-.617.618a.806.806 0 0 1-1.14 0l-1.854-1.855a.807.807 0 0 1 0-1.14l.618-.62a2.692 2.692 0 0 0 0-3.803l-1.21-1.211A2.555 2.555 0 0 0 7.978 4Z"/>
-              </svg>
-              <input type="number" v-model="basicInfoData.phone_number" class="grow" placeholder="Enter phone number" />
-            </label>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div class="col-span-1">
-                  <span class="label-text">Address Line</span>
-                  <label class="input mb-1 input-bordered flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                          <circle cx="12" cy="9" r="2.5"/>
-                      </svg>
-                      <input type="text" v-model="basicInfoData.addressLine" class="grow" placeholder="Enter Address Line" />
-                  </label>
-              </div>
-
-              <div class="col-span-1">
-                  <span class="label-text">Municipality</span>
-                  <label class="input mb-1 input-bordered flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                      <circle cx="12" cy="9" r="2.5"/>
-                    </svg>
-                    <input type="text" v-model="basicInfoData.municipality" class="grow" placeholder="Enter Municipality" />
-                  </label>
-              </div>
-
-              <div class="col-span-1">
-                  <span class="label-text">City</span>
-                  <label class="input mb-1 input-bordered flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                          <circle cx="12" cy="9" r="2.5"/>
-                      </svg>
-                      <input type="text" v-model="basicInfoData.city" class="grow" placeholder="Enter City" />
-                  </label>
-              </div>
-
-              <div class="col-span-1">
-                  <span class="label-text">Postal Code</span>
-                  <label class="input mb-1 input-bordered flex items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                          <circle cx="12" cy="9" r="2.5"/>
-                      </svg>
-                      <input type="text" v-model="basicInfoData.postalCode" class="grow" placeholder="Enter Postal Code" />
-                  </label>
-              </div>
+              <input type="text" v-model="basicInfoData.name" class="grow p-2 outline-none bg-transparent" placeholder="Enter Name" />
             </div>
+          </div>
 
-            <button class="btn btn-wide" @click="saveChanges">Save Changes</button>
+          <!-- Email Address -->
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Email Address</label>
+            <div class="relative flex items-center gap-2 rounded border border-gray-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 ml-3 text-gray-500" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" />
+                <path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" />
+              </svg>
+              <input type="email" v-model="basicInfoData.email" class="grow p-2 outline-none bg-transparent" placeholder="Enter Email" />
+            </div>
           </div>
         </div>
+
+        <h2 class="text-xl font-semibold text-gray-800 border-b pb-3 mt-8 mb-5">Contact Details</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Phone Number</label>
+            <input type="text" v-model="basicInfoData.phone_number" class="w-full p-3 border rounded-lg" placeholder="Enter phone number" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Address Line</label>
+            <input type="text" v-model="basicInfoData.addressLine" class="w-full p-3 border rounded-lg" placeholder="Enter Address Line" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Municipality</label>
+            <input type="text" v-model="basicInfoData.municipality" class="w-full p-3 border rounded-lg" placeholder="Enter Municipality" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">City</label>
+            <input type="text" v-model="basicInfoData.city" class="w-full p-3 border rounded-lg" placeholder="Enter City" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Postal Code</label>
+            <input type="text" v-model="basicInfoData.postalCode" class="w-full p-3 border rounded-lg" placeholder="Enter Postal Code" />
+          </div>
+        </div>
+
+        <button @click="saveChanges" class="btn md:btn-wide primary-btn-bg text-white mt-6">Save Changes</button>
       </div>
 
       <!-- Change Password -->
-      <div class="bg-white mt-4 rounded space-y-4 overflow-x-auto">
-        <div class="card border">
-          <div class="card-body">
-            <h2 class="card-title pb-3">Change Password</h2>
-            <span class="label-text">What is your current password?</span>
-            <label class="input mb-1 input-bordered flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="5" y="10" width="14" height="10" rx="2"/>
-                <path d="M8 10V7a4 4 0 1 1 8 0v3"/>
-                <circle cx="12" cy="15" r="1"/>
-                <rect x="11.5" y="15.5" width="1" height="3" rx="0.5"/>
-              </svg>
-              <input type="password" v-model="changePasswordData.current_password" class="grow" placeholder="Enter Current Password" />
-            </label>
-            <span class="label-text">What is your new password?</span>
-            <label class="input mb-1 input-bordered flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="5" y="10" width="14" height="10" rx="2"/>
-                <path d="M8 10V7a4 4 0 1 1 8 0v3"/>
-                <circle cx="12" cy="15" r="1"/>
-                <rect x="11.5" y="15.5" width="1" height="3" rx="0.5"/>
-              </svg>
-              <input type="password" v-model="changePasswordData.new_password" class="grow" placeholder="Enter New Password" />
-            </label>
-            <span class="label-text">Confirm new password?</span>
-            <label class="input mb-1 input-bordered flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <rect x="5" y="10" width="14" height="10" rx="2"/>
-                <path d="M8 10V7a4 4 0 1 1 8 0v3"/>
-                <circle cx="12" cy="15" r="1"/>
-                <rect x="11.5" y="15.5" width="1" height="3" rx="0.5"/>
-              </svg>
-              <input type="password" v-model="changePasswordData.confirm_new_password" class="grow" placeholder="Confirm New Password" />
-            </label>
-            <button class="btn btn-wide" @click="changePassword">Change Password</button>
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-800 border-b pb-3 mb-5">Change Password</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Current Password</label>
+            <input type="password" v-model="changePasswordData.current_password" class="w-full p-3 border rounded-lg" placeholder="Enter Current Password" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">New Password</label>
+            <input type="password" v-model="changePasswordData.new_password" class="w-full p-3 border rounded-lg" placeholder="Enter New Password" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-2">Confirm New Password</label>
+            <input type="password" v-model="changePasswordData.confirm_new_password" class="w-full p-3 border rounded-lg" placeholder="Confirm New Password" />
           </div>
         </div>
+        <button @click="changePassword" class="btn md:btn-wide primary-btn-bg text-white mt-6">Change Password</button>
       </div>
 
     </div>

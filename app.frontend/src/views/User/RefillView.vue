@@ -91,31 +91,6 @@ onMounted(() => {
         <h2 class="text-2xl font-semibold text-gray-700">Refill Water</h2>
       </div>
 
-      <!-- Filter Section -->
-      <!-- <div class="flex w-full flex-col-reverse lg:flex-row gap-3 justify-between">
-        <div class="w-full xl:w-1/6">
-          <select class="select select-bordered w-full">
-            <option disabled selected>Filter sales</option>
-            <option>Han Solo</option>
-            <option>Greedo</option>
-          </select>
-        </div>
-
-        <div class="flex items-center w-full lg:w-1/4">
-          <input type="text" placeholder="Search..."
-            class="px-4 py-[0.68rem] outline-none rounded-l-lg w-full border" />
-          <button class="btn btn-square primary-btn-bg text-white rounded rounded-r-lg">
-            <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-              height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
-                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-            </svg>
-          </button>
-        </div>
-      </div> -->
-
-      <!-- <div class="divider"></div> -->
-
       <!-- Main Refill List -->
       <div class="space-y-7">
         <button onclick="bookDelivery.showModal()" class="btn primary-btn-bg text-white">
@@ -152,7 +127,7 @@ onMounted(() => {
             class="bg-white border rounded hover:border-blue-200">
             <div class="flex flex-col justify-between h-[57vh] 2xl:h-[45vh] border-t-[0.4rem] border-[#56a7dc] rounded">
               <div class="px-4 pt-3 flex items-center justify-between">
-                <p class="text-gray-700 font-medium text-base">Delivery ID: #{{ data.id }}</p>
+                <p class="text-gray-700 font-medium text-base">Refill ID: #{{ data.id }}</p>
 
                 <!-- Action Button -->
                 <div class="dropdown dropdown-end">
@@ -174,18 +149,12 @@ onMounted(() => {
                   </div>
 
                   <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                    <li v-if="data.status === 'Pending Payment'"
-                      :class="{ 'disabled': data.status !== 'Pending Payment' }" @click="payRefillNow(data)">
+                    <li :class="{ 'disabled': data.status !== 'Pending Payment' }" @click="payRefillNow(data)">
                       <a>Pay Now</a>
                     </li>
 
-                    <li v-if="data.status === 'Waiting Delivery' || data.status === 'Visit Shop'"
-                      :class="{ 'disabled': data.status === 'Completed' }" @click="completeRefill(data.id)">
-                      <a>Complete Order</a>
-                    </li>
-
-                    <li :class="{ 'disabled': data.status !== 'Pending Payment' }" @click="cancelRefill(data.id)">
-                      <a>Cancel Order</a>
+                    <li :class="{ 'disabled': data.status !== 'Delivered' }" @click="completeRefill(data.id)">
+                      <a>Mark as Completed</a>
                     </li>
                   </ul>
                 </div>
@@ -209,18 +178,24 @@ onMounted(() => {
               <div class="border-t">
                 <div class="p-4 flex items-center gap-2">
                   <span v-if="data.status === 'Pending Payment'" @click="payRefillNow(data)"
-                    class="text-base bg-orange-100 px-3 text-center rounded-full text-orange-600 cursor-pointer hover:bg-orange-200">{{ data.status
-                    }}</span>
-                  <span v-if="data.status === 'Waiting Delivery'" @click="completeRefill(data.id)"
-                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600 cursor-pointer hover:bg-yellow-200">{{ data.status
-                    }}</span>
-                  <span v-if="data.status === 'Visit Shop'" @click="completeRefill(data.id)"
-                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600 cursor-pointer hover:bg-yellow-200">{{ data.status
-                    }}</span>
-                  <span v-if="data.status === 'Completed Order'"
-                    class="text-base bg-green-100 px-3 text-center rounded-full text-green-600">{{ data.status }}</span>
-                  <span v-if="data.status === 'Cancelled Order'"
-                    class="text-base bg-red-100 px-3 text-center rounded-full text-red-600">{{ data.status }}</span>
+                    class="text-base bg-orange-100 px-3 text-center rounded-full text-orange-600 cursor-pointer hover:bg-orange-200">
+                    {{ data.status }}
+                  </span>
+
+                  <span v-if="data.status === 'Delivered'" @click="completeRefill(data.id)"
+                    class="text-base bg-cyan-100 px-3 text-center rounded-full text-cyan-600 cursor-pointer hover:bg-cyan-200">
+                    {{ data.status }}
+                  </span>
+
+                  <span v-if="data.status === 'Completed'"
+                    class="text-base bg-green-100 px-3 text-center rounded-full text-green-600">
+                    {{ data.status }}
+                  </span>
+
+                  <span v-if="data.status === 'Waiting Delivery'"
+                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600">
+                    {{ data.status }}
+                  </span>
                 </div>
               </div>
             </div>

@@ -18,6 +18,17 @@ export const useGallonStore = defineStore('gallon', {
       }
     },
 
+    async getAllAdminGallon() {
+      try {
+        await this.getToken();
+        const response = await axios.get('/api/get-admin-gallon');
+        return response.data;
+
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
     async addGallonType(FormData) {
       try {
         await this.getToken();
@@ -43,10 +54,10 @@ export const useGallonStore = defineStore('gallon', {
       }
     },
 
-    async deleteGallonById(gallonId) {
+    async updateGallonStatusById(gallonId) {
       try {
         await this.getToken();
-        const response = await axios.post('/api/delete-gallon-type/'+gallonId);
+        const response = await axios.post('/api/update-gallon-type/'+gallonId);
         return response.data;
       } catch (error) {
         console.error(error);

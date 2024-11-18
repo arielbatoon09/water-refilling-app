@@ -70,7 +70,7 @@ const setSelectedData = (data) => {
 
 // Handle Send Review Feedback
 const handleReview = async () => {
-  FormData.value.resource = "shop";
+  FormData.value.resource = "Orders";
   FormData.value.resource_ref = selectedData.value.refid;
   FormData.value.orders = selectedData.value.orders.map(order => ({
     product_name: order.product_name,
@@ -103,7 +103,7 @@ const handleReview = async () => {
         confirmButtonText: 'Confirm'
       });
 
-      closeModal.value.click(); 
+      closeModal.value.click();
       renderPurchaseData();
     }
     console.log(response);
@@ -161,7 +161,7 @@ onMounted(() => {
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
             d="M12 13V8m0 8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
-        <span class="text-white">Walk-In Delivery should visit to <a class="font-medium hover:underline" target="_blank"
+        <span class="text-white">Walk-In should claim their order to <a class="font-medium hover:underline" target="_blank"
             href="https://www.google.com/maps/place/Alexa+Water+Refilling+Station/@10.2547228,123.9449681,980m/data=!3m2!1e3!4b1!4m6!3m5!1s0x33a99bbbfa5944d9:0xa7c9355a5c134578!8m2!3d10.2547228!4d123.947543!16s%2Fg%2F11j5lbq8lp?entry=ttu&g_ep=EgoyMDI0MTEwNi4wIKXMDSoASAFQAw%3D%3D">Alexa
             Water Refilling Station.</a></span>
       </div>
@@ -217,6 +217,8 @@ onMounted(() => {
               list.status }}</p>
             <p v-if="list.status === 'Completed'" class="bg-green-100 text-green-600 text-center mt-2 rounded">{{
               list.status }}</p>
+            <p v-if="list.status === 'Delivered'" class="bg-cyan-100 text-cyan-600 text-center mt-2 rounded">{{
+              list.status }}</p>
             <p v-if="list.status === 'Rated'" class="text-yellow-500 font-medium mt-2 rounded flex items-center gap-1">
               <svg class="w-[24px] h-[24px] text-yellow-500 -mt-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
@@ -240,8 +242,7 @@ onMounted(() => {
             </button>
 
             <!-- Complete Button -->
-            <button @click="completeOrder(list.refid)" v-if="list.status === 'To Receive'"
-              class="text-sm border border-[#56a7dc] bg-[#f5f8fa] py-2.5 px-4 rounded text-[#56a7dc] 
+            <button @click="completeOrder(list.refid)" v-if="list.status === 'Delivered'" class="text-sm border border-[#56a7dc] bg-[#f5f8fa] py-2.5 px-4 rounded text-[#56a7dc] 
                 active:scale-105 transition-transform ease-linear">
               Order Received
             </button>

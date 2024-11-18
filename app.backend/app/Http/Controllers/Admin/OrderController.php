@@ -35,6 +35,7 @@ class OrderController extends Controller
                     'total_items' => count($orderItems),
                     'total_price' => $orderItems->sum('total_item_price'),
                     'orders' => [],
+                    'user_role' => $user->user_role,
                     'user' => [
                         'name' => $user->name,
                         'email' => $user->email,

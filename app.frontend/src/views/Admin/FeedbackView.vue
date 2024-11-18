@@ -1,115 +1,83 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useReviewStore } from '@/stores/review';
 import AdminLayout from '@/components/AdminLayout.vue';
 
-const feedbacks = ref([
-  { 
-    id: 1, 
-    date: '2024-10-01', 
-    customerName: 'John Doe', 
-    product: 'Empty Galoons', 
-    rating: 4, 
-    comments: 'Good quality, but delivery was slow.', 
-    status: 'Reviewed' 
-  },
-  { 
-    id: 2, 
-    date: '2024-10-02', 
-    customerName: 'Jane Smith', 
-    product: '2pcs Refill Galoons', 
-    rating: 5, 
-    comments: 'Excellent service and product!', 
-    status: 'Reviewed' 
-  },
-  { 
-    id: 3, 
-    date: '2024-10-03', 
-    customerName: 'Alice Johnson', 
-    product: 'Galoon Cover', 
-    rating: 3, 
-    comments: 'Average quality, could be better.', 
-    status: 'Pending' 
-  },
-  { 
-    id: 4, 
-    date: '2024-10-04', 
-    customerName: 'Bob Brown', 
-    product: '1pcs Refill Galoon', 
-    rating: 5, 
-    comments: 'Very satisfied with the purchase.', 
-    status: 'Reviewed' 
-  },
-  { 
-    id: 5, 
-    date: '2024-10-05', 
-    customerName: 'Charlie Davis', 
-    product: 'Galoon Cover Seal', 
-    rating: 2, 
-    comments: 'Not happy with the product quality.', 
-    status: 'Pending' 
-  },
-]);
-
-const searchQuery = ref('');
+const reviews = ref([]);
+const reviewStore = useReviewStore();
 const searchInput = ref('');
-const currentTab = ref('All Items');
+const searchQuery = ref('');
+const selectedRatings = ref('');
 const currentPage = ref(1);
-const itemsPerPage = 4;
+const itemsPerPage = 10;
 
-const tabs = ['All Items', 'In Stock', 'Out of Stock', 'Low Stock'];
-
-// Trigger search when button is clicked
 const performSearch = () => {
-  searchQuery.value = searchInput.value;
+  searchQuery.value = searchInput.value.trim();
+  currentPage.value = 1;
 };
 
-const filteredfeedbacks = computed(() => {
-  let filtered = feedbacks.value;
+const filteredReviews = computed(() => {
+  const search = searchQuery.value.toLowerCase();
+  const selectedRating = selectedRatings.value;
+  const filtered = reviews.value.filter((review) => {
+    const matchesSearch =
+      review.resource.toLowerCase().includes(search) ||
+      review.resource_ref.toLowerCase().includes(search) ||
+      review.id.toString().includes(search);
 
-  if (currentTab.value !== 'All Items') {
-    filtered = filtered.filter(product => product.status === currentTab.value);
-  }
+    // Filter by selected rating if a rating is chosen
+    const matchesRating = !selectedRating || review.rate === Number(selectedRating);
 
-  if (searchQuery.value) {
-    filtered = filtered.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
+    return matchesSearch && matchesRating;
+  });
 
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filtered.slice(start, end);
+  // Pagination logic
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return filtered.slice(startIndex, endIndex);
 });
 
 const totalPages = computed(() => {
-  let filtered = feedbacks.value;
+  const search = searchQuery.value.toLowerCase();
+  const selectedRating = selectedRatings.value;
+  const totalFiltered = reviews.value.filter((review) => {
+    const matchesSearch =
+      review.resource.toLowerCase().includes(search) ||
+      review.resource_ref.toLowerCase().includes(search) ||
+      review.id.toString().includes(search);
 
-  if (currentTab.value !== 'All Items') {
-    filtered = filtered.filter(product => product.status === currentTab.value);
-  }
+    // Filter by selected rating if a rating is chosen
+    const matchesRating = !selectedRating || review.rate === Number(selectedRating);
 
-  if (searchQuery.value) {
-    filtered = filtered.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
-
-  return Math.ceil(filtered.length / itemsPerPage);
+    return matchesSearch && matchesRating;
+  });
+  return Math.ceil(totalFiltered.length / itemsPerPage);
 });
+
+
+const renderReviews = async () => {
+  const response = await reviewStore.getAllReviewAdmin();
+  console.log(response);
+  reviews.value = response.data;
+};
+
+// Pagination controls
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value += 1;
+  }
+};
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--;
+    currentPage.value -= 1;
   }
 };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
+onMounted(() => {
+  renderReviews();
+});
 </script>
-
 
 <template>
   <AdminLayout>
@@ -118,17 +86,20 @@ const nextPage = () => {
       <div class="mb-4 mt-7 flex flex-wrap gap-4 justify-between">
         <!-- Filter Tabs -->
         <div class="w-full lg:w-1/6">
-          <select class="select select-bordered w-full">
-            <option disabled selected>Filter feedbacks</option>
-            <option>Han Solo</option>
-            <option>Greedo</option>
+          <select v-model="selectedRatings" class="select select-bordered w-full" @change="renderReviews">
+            <option value="">All Ratings</option>
+            <option value="5">5 stars</option>
+            <option value="4">4 stars</option>
+            <option value="3">3 stars</option>
+            <option value="2">2 stars</option>
+            <option value="1">1 star</option>
           </select>
         </div>
 
         <!-- Search -->
-        <div class="flex items-center gap-2 w-full lg:w-1/4">
+        <div class="flex items-center w-full lg:w-1/4">
           <input v-model="searchInput" type="text" placeholder="Search..." class="px-4 py-3 rounded w-full" />
-          <button @click="performSearch" class="btn btn-square primary-btn-bg text-white">
+          <button @click="performSearch" class="btn btn-square rounded-l primary-btn-bg text-white">
             <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
               height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
@@ -139,32 +110,34 @@ const nextPage = () => {
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto w-100 mt-4">
-        <table class="min-w-full bg-white text-left">
+      <div class="w-full">
+        <table class="w-full table-auto bg-white text-left border-collapse">
           <thead>
-            <tr class="border-b border-gray-200">
-              <th class="py-2 px-4 w-1/12 whitespace-nowrap">Feedback ID</th>
-              <th class="py-2 px-4">Date</th>
-              <th class="py-2 px-4">Customer Name</th>
-              <th class="py-2 px-4">Product</th>
-              <th class="py-2 px-4">Rating</th>
-              <th class="py-2 px-4">Comments</th>
-              <th class="py-2 px-4">Status</th>
-              <th class="py-2 px-4">Action</th>
+            <tr class="border-b border-gray-200 bg-gray-50 text-sm md:text-base">
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">ID</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Resource</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Reference</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Details</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Rate</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Comment</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="feedback in feedbacks" :key="feedback.id">
-              <td class="py-4 px-14">{{ feedback.id }}</td>
-              <td class="py-4 px-4">{{ feedback.date }}</td>
-              <td class="py-4 px-4">{{ feedback.customerName }}</td>
-              <td class="py-4 px-4">{{ feedback.product }}</td>
-              <td class="py-4 px-4">{{ feedback.rating }}</td>
-              <td class="py-4 px-4">{{ feedback.comments }}</td>
-              <td class="py-4 px-4">{{ feedback.status }}</td>
-              <td class="py-4 px-4">
-                <button class="bg-blue-500 text-white px-4 py-2 rounded">View</button>
+            <tr v-for="user in filteredReviews" :key="user.id" class="hover:bg-gray-50">
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.id }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.resource }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.resource_ref }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.details }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center flex justify-center items-center">
+                <span v-for="rate in user.rate">
+                  <svg class="w-[24px] h-[24px] text-yellow-500 -mt-1" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M13.849 4.22c-.684-1.626-3.014-1.626-3.698 0L8.397 8.387l-4.552.361c-1.775.14-2.495 2.331-1.142 3.477l3.468 2.937-1.06 4.392c-.413 1.713 1.472 3.067 2.992 2.149L12 19.35l3.897 2.354c1.52.918 3.405-.436 2.992-2.15l-1.06-4.39 3.468-2.938c1.353-1.146.633-3.336-1.142-3.477l-4.552-.36-1.754-4.17Z" />
+                  </svg>
+                </span>
               </td>
+              <td class="py-4 px-4 text-center">{{ user.comment }}</td>
             </tr>
           </tbody>
         </table>
@@ -174,6 +147,7 @@ const nextPage = () => {
       <div class="mt-4 flex justify-between">
         <button @click="prevPage" :disabled="currentPage === 1"
           class="btn px-4 py-2 bg-gray-200 rounded">Previous</button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
         <button @click="nextPage" :disabled="currentPage === totalPages"
           class="btn px-4 py-2 bg-gray-200 rounded">Next</button>
       </div>

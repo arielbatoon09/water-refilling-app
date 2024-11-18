@@ -2,85 +2,107 @@
 import AdminLayout from '@/components/AdminLayout.vue';
 import { useRefillStore } from '@/stores/refill';
 import { ref, computed, onMounted } from 'vue';
-import manualAddRefill from '@/components/ManualRefillModal.vue';
+import ManualAddRefill from '@/components/ManualRefillModal.vue';
 import Swal from 'sweetalert2';
+import EventBus from '@/js/EventBus';
 
 const refills = ref([]);
 const refillStore = useRefillStore();
-const searchQuery = ref('');
 const searchInput = ref('');
-const currentTab = ref('All refills');
+const searchQuery = ref('');
+const currentTab = ref('All');
 const currentPage = ref(1);
-const itemsPerPage = 4;
+const itemsPerPage = 10;
 
-const tabs = ['All refills', 'Completed', 'Pending', 'Cancelled', 'Reviewed'];
+const tabs = ['All', 'Waiting Delivery', 'Pending Payment', 'Delivered', 'Completed'];
 
 const performSearch = () => {
-  searchQuery.value = searchInput.value;
+  searchQuery.value = searchInput.value.trim();
+  currentPage.value = 1;
 };
 
-const filteredrefills = computed(() => {
-  let filtered = refills.value;
+const filteredRefills = computed(() => {
+  const query = searchQuery.value.toLowerCase();
+  let filtered = refills.value.filter((refill) => {
+    const matchesTab = currentTab.value === 'All' || refill.status === currentTab.value;
+    const matchesQuery = query
+      ? [
+        refill.id,
+        refill.name,
+        refill.gallon_details.map(gallon => `${gallon.gallon_size} ${gallon.no_of_gallon}`).join(', '),
+        refill.delivery_type,
+        refill.mop,
+        refill.user_role === 'user'
+          ? `${refill.address.address} ${refill.address.municipality} ${refill.address.city} ${refill.address.postal_code} ${refill.address.phone_number}`
+          : 'Alexa Water Refilling Station',
+        refill.t_overall_fee,
+        refill.status,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(query)
+      : true;
 
-  if (currentTab.value !== 'All refills') {
-    filtered = filtered.filter(Refill => Refill.status === currentTab.value);
-  }
-
-  if (searchQuery.value) {
-    filtered = filtered.filter(Refill =>
-      Refill.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
+    return matchesTab && matchesQuery;
+  });
 
   const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filtered.slice(start, end);
+  return filtered.slice(start, start + itemsPerPage);
 });
 
 const totalPages = computed(() => {
-  let filtered = refills.value;
+  const query = searchQuery.value.toLowerCase();
+  const filtered = refills.value.filter((refill) => {
+    const matchesTab = currentTab.value === 'All' || refill.status === currentTab.value;
+    const matchesQuery = query
+      ? [
+        refill.id,
+        refill.name,
+        refill.gallon_details.map(gallon => `${gallon.gallon_size} ${gallon.no_of_gallon}`).join(', '),
+        refill.delivery_type,
+        refill.mop,
+        refill.user_role === 'user'
+          ? `${refill.address.address} ${refill.address.municipality} ${refill.address.city} ${refill.address.postal_code} ${refill.address.phone_number}`
+          : 'Alexa Water Refilling Station',
+        refill.t_overall_fee,
+        refill.status,
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(query)
+      : true;
 
-  if (currentTab.value !== 'All refills') {
-    filtered = filtered.filter(Refill => Refill.status === currentTab.value);
-  }
-
-  if (searchQuery.value) {
-    filtered = filtered.filter(Refill =>
-      Refill.customer.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
+    return matchesTab && matchesQuery;
+  });
 
   return Math.ceil(filtered.length / itemsPerPage);
 });
 
 const prevPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
+  if (currentPage.value > 1) currentPage.value--;
 };
 
 const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
+  if (currentPage.value < totalPages.value) currentPage.value++;
 };
 
 const getAllRefills = async () => {
   try {
     const response = await refillStore.getAllRefill();
+    console.log(response);
     refills.value = response.data;
   } catch (error) {
-    console.log('Error in ' + error);
+    console.error('Failed to fetch refills:', error);
   }
-}
+};
 
 const changeToDelivered = async (id) => {
   try {
     const response = await refillStore.changeStatus(id);
-    
-    if(response.status == 200){
+
+    if (response.status == 200) {
       Swal.fire('success', 'Delivered!', 'success');
-    }else{
+    } else {
       console.log(response);
     }
   } catch (error) {
@@ -93,13 +115,14 @@ const confirmAction = (id) => {
     title: 'Are you sure?',
     text: 'This action cannot be undone!',
     icon: 'warning',
-    showCancelButton: true, 
+    showCancelButton: true,
     confirmButtonText: 'Yes, do it!',
     cancelButtonText: 'No, cancel!',
-    reverseButtons: true, 
+    reverseButtons: true,
   }).then((result) => {
     if (result.isConfirmed) {
       changeToDelivered(id);
+      getAllRefills();
     } else {
       Swal.fire('Cancelled', 'Your action has been canceled', 'error');
     }
@@ -108,6 +131,7 @@ const confirmAction = (id) => {
 
 onMounted(() => {
   getAllRefills();
+  EventBus.on('refillUpdated', getAllRefills);
 });
 </script>
 
@@ -115,7 +139,7 @@ onMounted(() => {
   <AdminLayout>
     <div class="mx-auto mt-10">
       <!-- Add Refill Button -->
-      <button onclick="manualRefill.showModal()" class="btn primary-btn-bg text-white" >
+      <button onclick="manualRefill.showModal()" class="btn primary-btn-bg text-white">
         <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
           height="24" fill="none" viewBox="0 0 24 24">
           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -127,7 +151,7 @@ onMounted(() => {
       <dialog id="manualRefill" class="modal">
         <manualAddRefill />
       </dialog>
-      
+
       <!-- Add Refill & Search Button -->
       <div class="mb-4 mt-7 flex flex-wrap gap-4 justify-between">
         <!-- Filter Tabs -->
@@ -139,9 +163,9 @@ onMounted(() => {
         </div>
 
         <!-- Search -->
-        <div class="flex items-center gap-2 w-full lg:w-1/4">
+        <div class="flex items-center w-full lg:w-1/4">
           <input v-model="searchInput" type="text" placeholder="Search..." class="px-4 py-3 rounded w-full" />
-          <button @click="performSearch" class="btn btn-square primary-btn-bg text-white">
+          <button @click="performSearch" class="btn btn-square rounded-l primary-btn-bg text-white">
             <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
               height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
@@ -152,73 +176,79 @@ onMounted(() => {
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto w-100">
-        <table class="min-w-full bg-white text-left">
+      <div class="w-full">
+        <table class="w-full table-auto bg-white text-left border-collapse">
           <thead>
-            <tr class="bRefill-b bRefill-gray-200">
-              <th class="py-2 px-4 w-14 whitespace-nowrap">Refill ID</th>
-              <th class="py-2 px-10">Customer</th>
-              <th class="py-2 px-4">Refill Details</th>
-              <th class="py-2 px-4">Refill Type</th>
-              <th class="py-2 px-4">Payment Method</th>
-              <th class="py-2 px-4">Address</th>
-              <th class="py-2 px-4">Phone Number</th>
-              <th class="py-2 px-4">Total Fee</th>
-              <th class="py-2 px-4">Status</th>
-              <th class="py-2 px-1">Action</th>
+            <tr class="border-b border-gray-200 bg-gray-50 text-sm md:text-base">
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">ID</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">Name</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Details</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Delivery Type</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Delivery Date</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">MOP</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Address</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Phone</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Total Fee</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Status</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="Refill in filteredrefills" :key="Refill.id">
-              <td class="py-4 px-10">{{ Refill.id }}</td>
-              <td class="py-4 px-10">{{ Refill.user_role }}</td>
-              <td class="py-4 px-4">
+            <tr v-for="Refill in filteredRefills" :key="Refill.id" class="hover:bg-gray-50">
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">{{ Refill.id }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ Refill.name }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">
                 <span v-for="(gallon, index) in Refill.gallon_details" :key="index">
-                  {{ gallon.gallon_size }} - {{ gallon.no_of_gallon }}
+                  {{ gallon.gallon_size }} - {{ gallon.no_of_gallon }} Gallon(s)
                   <span v-if="index < Refill.gallon_details.length - 1">, </span>
                 </span>
               </td>
-              <td class="py-4 px-4">{{ Refill.delivery_type }}</td>
-              <td class="py-4 px-4">{{ Refill.mop }}</td>
-              <td class="py-4 px-4">
-                <span v-if="Refill.user_role == 'user'">
-                  <small>{{ Refill.address.address }}, {{ Refill.address.municipality }} <br> {{ Refill.address.city }}, {{ Refill.address.postal_code }}</small> 
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">{{ Refill.delivery_type }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">{{ Refill.delivery_date }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">{{ Refill.mop }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-normal">
+                <span v-if="Refill.user_role === 'user'">
+                  {{ Refill.address.address }}, {{ Refill.address.municipality }} <br>
+                  {{ Refill.address.city }}, {{ Refill.address.postal_code }}
                 </span>
                 <span v-else>
                   Alexa Water Refilling Station
                 </span>
               </td>
-              <td class="py-4 px-4">
-                <span v-if="Refill.user_role == 'user'">
-                  {{ Refill.address.phone_number }} 
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">
+                <span v-if="Refill.user_role === 'user'">
+                  0{{ Refill.address.phone_number }}
                 </span>
                 <span v-else>
-                  Alexa Water Refilling Station
+                  N/A
                 </span>
               </td>
-              <td class="py-4 px-4">₱{{ Refill.t_overall_fee }}.00</td>
-              <td class="py-4 px-4">
-                <span :class="[
-                  'p-2 rounded',
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">₱{{ Refill.t_overall_fee }}.00</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">
+                <span :class="['p-2 rounded',
                   Refill.status === 'Completed' ? 'bg-green-200 text-green-700' : '',
-                  Refill.status === 'Pending' ? 'bg-orange-200 text-orange-700' : '',
-                  Refill.status === 'Cancelled' ? 'bg-red-200 text-red-700' : '',
-                  Refill.status === 'Reviewed' ? 'bg-yellow-200 text-yellow-700' : ''
+                  Refill.status === 'Pending Payment' ? 'bg-orange-200 text-orange-700' : '',
+                  Refill.status === 'Delivered' ? 'bg-cyan-200 text-cyan-700' : '',
+                  Refill.status === 'Waiting Delivery' ? 'bg-yellow-200 text-yellow-700' : ''
                 ]">
                   {{ Refill.status }}
                 </span>
               </td>
-              <td>
-                <details class="dropdown dropdown-end">
-                  <summary class="btn m-1">
-                    <svg class="w-[24px] h-[24px] text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M6 12h.01m6 0h.01m5.99 0h.01" />
+              <td class="text-center">
+                <div class="dropdown dropdown-end">
+                  <button class="btn btn-xs sm:btn-sm">
+                    <svg class="w-4 h-4 sm:w-6 sm:h-6 text-gray-700" xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
+                        d="M6 12h.01m6 0h.01m5.99 0h.01" />
                     </svg>
-                  </summary>
-                  <ul class="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                    <li><a @click="confirmAction(Refill.id)">Mark as Delivered</a></li>
+                  </button>
+                  <ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-40 p-2 shadow">
+                    <li :class="{ 'disabled': Refill.status !== 'Waiting Delivery' }">
+                      <a @click="confirmAction(Refill.id)">Mark as Delivered</a>
+                    </li>
                   </ul>
-                </details>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -229,6 +259,7 @@ onMounted(() => {
       <div class="mt-4 flex justify-between">
         <button @click="prevPage" :disabled="currentPage === 1"
           class="btn px-4 py-2 bg-gray-200 rounded">Previous</button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
         <button @click="nextPage" :disabled="currentPage === totalPages"
           class="btn px-4 py-2 bg-gray-200 rounded">Next</button>
       </div>

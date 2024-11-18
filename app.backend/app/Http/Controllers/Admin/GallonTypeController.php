@@ -18,7 +18,7 @@ class GallonTypeController extends Controller
 
     public function getSelectedGallon(Request $request){
         try {
-            $gallonType = GallonType::where('id', $request->id)->where('flag', 1)->first();;
+            $gallonType = GallonType::where('id', $request->id)->first();;
 
             if ($gallonType) {
                 $gallonData = [
@@ -132,7 +132,37 @@ class GallonTypeController extends Controller
             return response($this->response(501, $th));
         }
     }
-     
+    
+    public function getAllAdminGallon()
+    {
+        try {
+            $gallonTypes = GallonType::get();
+
+            $gallonDatas = [];
+
+            foreach ($gallonTypes as $data) {
+                $gallonDatas[$data->id] = [
+                    'id' => $data->id,
+                    "gallon_size" => $data->gallon_size,
+                    "gallon_price" => $data->gallon_price,
+                    "delivery_fee" => $data->delivery_fee,
+                    "gallon_image" => $data->gallon_image,
+                    "flag" => $data->flag,
+                    "created_at" => $data->created_at,
+                    "updated_at" => $data->updated_at,
+                ];
+            }
+
+            return response([
+                'status' => 200,
+                'source' => 'GallonTypeController',
+                'data' => $gallonDatas,
+            ]);
+
+        } catch (Throwable $e) {
+            return response($this->response(501, 'Error in '.$e));
+        }
+    }
 
     private function getAllGallonTypeFunction()
     {
@@ -163,8 +193,6 @@ class GallonTypeController extends Controller
         } catch (Throwable $e) {
             return response($this->response(501, 'Error in '.$e));
         }
-
-
     }
 
     private function updateGallonTypesFunction(Request $request)
@@ -192,6 +220,15 @@ class GallonTypeController extends Controller
                     'source' => 'GallonTypeController',
                     'message' => 'Make sure fill up the booking details.',
                     'errors' => $validator->errors()
+                ]);
+            }
+
+            // Check if gallon_size already exists
+            if (GallonType::where('gallon_size', $request->input('gallon_size'))->exists()) {
+                return response([
+                    'status' => 409,
+                    'source' => 'GallonTypeController',
+                    'message' => 'Gallon size already exists!'
                 ]);
             }
 
@@ -229,6 +266,40 @@ class GallonTypeController extends Controller
             return response($this->response(501, 'Error in ' .$th));
         }
     }
+
+    public function updateGallonStatus(Request $request)
+    {
+        try {
+            // Find the gallon type by ID
+            $getGallonType = GallonType::find($request->id);
+    
+            if ($getGallonType) {
+                // Toggle the flag value
+                $newFlag = $getGallonType->flag === 1 ? 0 : 1;
+    
+                // Update the flag
+                $getGallonType->update([
+                    'flag' => $newFlag,
+                ]);
+    
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Gallon status updated successfully!',
+                    'updated_flag' => $newFlag,
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 409,
+                    'message' => 'This gallon size does not exist in the data!',
+                ]);
+            }
+        } catch (Throwable $th) {
+            return response()->json([
+                'status' => 501,
+                'message' => 'Error: ' . $th->getMessage(),
+            ]);
+        }
+    }    
 
     private function deleteGallonTypeFuntion(Request $request)
     {

@@ -12,7 +12,7 @@ class ReviewController extends Controller
     public function addReview(Request $request)
     {
         try {
-            if ($request->resource === 'shop') {
+            if ($request->resource === 'Orders') {
                 $details = collect($request->orders)->map(function ($order) {
                     return "{$order['product_name']} ({$order['order_quantity']}pcs)";
                 })->join(', ');

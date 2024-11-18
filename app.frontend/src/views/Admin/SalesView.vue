@@ -1,144 +1,114 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useSalesStore } from '@/stores/sales';
 import AdminLayout from '@/components/AdminLayout.vue';
 
-const sales = ref([
-  {
-    id: 1,
-    date: '2024-10-01',
-    customerName: 'John Doe',
-    product: 'Empty Galoons',
-    quantity: 5,
-    unitPrice: '₱100.00',
-    totalPrice: '₱500.00',
-    paymentMethod: 'Credit Card',
-    status: 'Completed'
-  },
-  {
-    id: 2,
-    date: '2024-10-02',
-    customerName: 'Jane Smith',
-    product: '2pcs Refill Galoons',
-    quantity: 2,
-    unitPrice: '₱150.00',
-    totalPrice: '₱300.00',
-    paymentMethod: 'Cash',
-    status: 'Pending'
-  },
-  {
-    id: 3,
-    date: '2024-10-03',
-    customerName: 'Alice Johnson',
-    product: 'Galoon Cover',
-    quantity: 1,
-    unitPrice: '₱200.00',
-    totalPrice: '₱200.00',
-    paymentMethod: 'PayMaya',
-    status: 'Completed'
-  },
-  {
-    id: 4,
-    date: '2024-10-04',
-    customerName: 'Bob Brown',
-    product: '1pcs Refill Galoon',
-    quantity: 3,
-    unitPrice: '₱250.00',
-    totalPrice: '₱750.00',
-    paymentMethod: 'PayMaya',
-    status: 'Completed'
-  },
-  {
-    id: 5,
-    date: '2024-10-05',
-    customerName: 'Charlie Davis',
-    product: 'Galoon Cover Seal',
-    quantity: 4,
-    unitPrice: '₱300.00',
-    totalPrice: '₱1200.00',
-    paymentMethod: 'Credit Card',
-    status: 'Pending'
-  },
-]);
-
-const searchQuery = ref('');
+// Data and state management
+const salesData = ref([]);
+const salesStore = useSalesStore();
 const searchInput = ref('');
-const currentTab = ref('All Items');
+const searchQuery = ref('');
+const selectedResource = ref('');
 const currentPage = ref(1);
-const itemsPerPage = 4;
+const itemsPerPage = 10;
 
-const tabs = ['All Items', 'In Stock', 'Out of Stock', 'Low Stock'];
-
-// Trigger search when button is clicked
+// Perform search when the input changes
 const performSearch = () => {
-  searchQuery.value = searchInput.value;
+  searchQuery.value = searchInput.value.trim();
+  currentPage.value = 1;
 };
 
+// Filtered and paginated sales data
 const filteredSales = computed(() => {
-  let filtered = sales.value;
+  const search = searchQuery.value.toLowerCase();
+  const selectedRes = selectedResource.value;
 
-  if (currentTab.value !== 'All Items') {
-    filtered = filtered.filter(product => product.status === currentTab.value);
-  }
+  const filtered = salesData.value.filter((sale) => {
+    const matchesSearch =
+      sale.name.toLowerCase().includes(search) ||
+      sale.id.toLowerCase().includes(search) ||
+      sale.details.toLowerCase().includes(search) ||
+      sale.mop.toLowerCase().includes(search);
 
-  if (searchQuery.value) {
-    filtered = filtered.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
+    const matchesResource =
+      !selectedRes || (selectedRes === 'Refill' && sale.type === 'Refill') || (selectedRes === 'Order' && sale.type === 'Order');
 
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filtered.slice(start, end);
+    return matchesSearch && matchesResource;
+  });
+
+  // Pagination logic
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return filtered.slice(startIndex, endIndex);
 });
 
+// Total pages for pagination
 const totalPages = computed(() => {
-  let filtered = sales.value;
+  const search = searchQuery.value.toLowerCase();
+  const selectedRes = selectedResource.value;
 
-  if (currentTab.value !== 'All Items') {
-    filtered = filtered.filter(product => product.status === currentTab.value);
-  }
+  const totalFiltered = salesData.value.filter((sale) => {
+    const matchesSearch =
+      sale.name.toLowerCase().includes(search) ||
+      sale.id.toLowerCase().includes(search) ||
+      sale.details.toLowerCase().includes(search) ||
+      sale.mop.toLowerCase().includes(search);
 
-  if (searchQuery.value) {
-    filtered = filtered.filter(product =>
-      product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
-  }
+    const matchesResource =
+      !selectedRes || (selectedRes === 'Refill' && sale.type === 'Refill') || (selectedRes === 'Order' && sale.type === 'Order');
 
-  return Math.ceil(filtered.length / itemsPerPage);
+    return matchesSearch && matchesResource;
+  });
+
+  return Math.ceil(totalFiltered.length / itemsPerPage);
 });
+
+// Fetch sales data from the backend
+const renderSales = async () => {
+  const response = await salesStore.getAllSuccessSales();
+  salesData.value = response.data.map((sale) => ({
+    ...sale,
+    type: sale.details.includes('Gallon') ? 'Refill' : 'Order',
+  }));
+};
+
+// Pagination controls
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value += 1;
+  }
+};
 
 const prevPage = () => {
   if (currentPage.value > 1) {
-    currentPage.value--;
+    currentPage.value -= 1;
   }
 };
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
+// Lifecycle hook
+onMounted(() => {
+  renderSales();
+});
 </script>
-
 
 <template>
   <AdminLayout>
     <div class="mx-auto mt-10">
-      <!-- Add Order & Search Button -->
+      <!-- Filters and Search -->
       <div class="mb-4 mt-7 flex flex-wrap gap-4 justify-between">
-        <!-- Filter Tabs -->
+        <!-- Resource Filter -->
         <div class="w-full lg:w-1/6">
-          <select class="select select-bordered w-full">
-            <option disabled selected>Filter sales</option>
-            <option>Han Solo</option>
-            <option>Greedo</option>
+          <select v-model="selectedResource" class="select select-bordered w-full">
+            <option value="">All Resources</option>
+            <option value="Refill">Refill</option>
+            <option value="Order">Order</option>
           </select>
         </div>
 
         <!-- Search -->
-        <div class="flex items-center gap-2 w-full lg:w-1/4">
+        <div class="flex items-center w-full lg:w-1/4">
           <input v-model="searchInput" type="text" placeholder="Search..." class="px-4 py-3 rounded w-full" />
-          <button @click="performSearch" class="btn btn-square primary-btn-bg text-white">
+          <button @click="performSearch" class="btn btn-square rounded-l primary-btn-bg text-white">
             <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
               height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
@@ -149,35 +119,35 @@ const nextPage = () => {
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto w-100 mt-4">
-        <table class="min-w-full bg-white text-left">
+      <div class="w-full">
+        <table class="w-full table-auto bg-white text-left border-collapse">
           <thead>
-            <tr class="border-b border-gray-200">
-              <th class="py-2 px-4 w-1/12 whitespace-nowrap">Transaction ID</th>
-              <th class="py-2 px-4">Date</th>
-              <th class="py-2 px-4">Customer Name</th>
-              <th class="py-2 px-4">Product</th>
-              <th class="py-2 px-4">Quantity</th>
-              <th class="py-2 px-4">Unit Price</th>
-              <th class="py-2 px-4">Total Price</th>
-              <th class="py-2 px-4">Payment Method</th>
-              <th class="py-2 px-4">Status</th>
-              <th class="py-2 px-4">Action</th>
+            <tr class="border-b border-gray-200 bg-gray-50 text-sm md:text-base">
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">User ID</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Customer</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Type</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Reference</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Details</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Recorded Date</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">MOP</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Amount</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="sale in sales" :key="sale.id">
-              <td class="py-4 px-14">{{ sale.id }}</td>
-              <td class="py-4 px-4">{{ sale.date }}</td>
-              <td class="py-4 px-4">{{ sale.customerName }}</td>
-              <td class="py-4 px-4">{{ sale.product }}</td>
-              <td class="py-4 px-4">{{ sale.quantity }}</td>
-              <td class="py-4 px-4">{{ sale.unitPrice }}</td>
-              <td class="py-4 px-4">{{ sale.totalPrice }}</td>
-              <td class="py-4 px-4">{{ sale.paymentMethod }}</td>
-              <td class="py-4 px-4">{{ sale.status }}</td>
-              <td class="py-4 px-4">
-                <button class="bg-blue-500 text-white px-4 py-2 rounded">View</button>
+            <tr v-for="sale in filteredSales" :key="sale.id" class="hover:bg-gray-50">
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.uid }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.name }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.type }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.id }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.details }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.updated_at }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.mop }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">₱{{ sale.amount }}.00</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">
+                <span class="p-2 rounded bg-green-200 text-green-700">
+                  Recorded
+                </span>
               </td>
             </tr>
           </tbody>
@@ -186,10 +156,13 @@ const nextPage = () => {
 
       <!-- Pagination -->
       <div class="mt-4 flex justify-between">
-        <button @click="prevPage" :disabled="currentPage === 1"
-          class="btn px-4 py-2 bg-gray-200 rounded">Previous</button>
-        <button @click="nextPage" :disabled="currentPage === totalPages"
-          class="btn px-4 py-2 bg-gray-200 rounded">Next</button>
+        <button @click="prevPage" :disabled="currentPage === 1" class="btn px-4 py-2 bg-gray-200 rounded">
+          Previous
+        </button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button @click="nextPage" :disabled="currentPage === totalPages" class="btn px-4 py-2 bg-gray-200 rounded">
+          Next
+        </button>
       </div>
     </div>
   </AdminLayout>

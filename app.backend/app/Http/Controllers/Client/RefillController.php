@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Refill;
 use App\Models\Transaction;
+use App\Models\Addresses;
 use Throwable;
 use DateTime;
 
@@ -126,7 +127,7 @@ class RefillController extends Controller
             } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'COD') {
                 $status = 'Visit Shop';
             } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'Over-The-Counter') {
-                $status = 'Completed Order';
+                $status = 'Completed';
             } else {
                 $status = 'Pending Payment';
             }
@@ -270,7 +271,7 @@ class RefillController extends Controller
         try {
             $refill = Refill::where('id', $id)->first();
             $refill->update([
-                'status' => 'Completed Order'
+                'status' => 'Completed'
             ]);
 
             return response([

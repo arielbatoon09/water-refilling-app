@@ -72,15 +72,6 @@ const removeGallonPills = (index) => {
   return gallonPills.value.splice(index, 1);
 };
 
-// Handle Form Slide State
-const handleSlideState = () => {
-  if (slideState.value === 0) {
-    slideState.value = 1;
-  } else if (slideState.value === 1) {
-    slideState.value = 0;
-  }
-};
-
 // Handle Book Now
 const handleBookNow = async () => {
   FormData.value.gallon_details = gallonPills.value;
@@ -117,15 +108,6 @@ const handleBookNow = async () => {
     errorMsg.value = 'Make sure fill up the booking details';
   }
 };
-
-// Block Off the Previous Dates
-const currentDate = computed(() => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-});
 
 onMounted(() => {
   renderGallon();
@@ -202,7 +184,7 @@ onMounted(() => {
       </div>
 
       <div class="space-y-2 mt-6">
-        <button @click="handleBookNow" clsass="btn primary-btn-bg text-white w-full">Book  Now</button>
+        <button @click="handleBookNow" class="btn primary-btn-bg text-white w-full">Book Now</button>
       </div>
     </div>
   </div>

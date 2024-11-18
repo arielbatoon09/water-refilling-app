@@ -30,6 +30,16 @@ export const useProductStore = defineStore('product', {
       }
     },
 
+    async getProductsAdmin() {
+      try {
+        await this.getToken();
+        const response = await axios.get('/api/get-products-admin');
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
     async getSelectedProducts(id) {
       try {
         await this.getToken();
@@ -57,10 +67,10 @@ export const useProductStore = defineStore('product', {
       }
     },
 
-    async removeProduct(id){
+    async updateProductStatus(id){
       try {
         await this.getToken();
-        const response = await axios.post(`/api/remove-product/${id}`);
+        const response = await axios.post(`/api/update-product-status/${id}`);
         return response.data;
       } catch (error) {
         console.error(error);

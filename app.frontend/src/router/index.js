@@ -6,8 +6,8 @@ import AuthView from '@/views/AuthView.vue'
 import DashboardView from '@/views/Admin/DashboardView.vue'
 import GallonView from '@/views/Admin/GallonView.vue'
 import ManageRefillView from '@/views/Admin/ManageRefillView.vue'
-import DeliveryView from '@/views/Admin/DeliveryView.vue'
-import InventoryView from '@/views/Admin/InventoryView.vue'
+import OrdersView from '@/views/Admin/OrdersView.vue'
+import ProductsView from '@/views/Admin/ProductsView.vue'
 import SalesView from '@/views/Admin/SalesView.vue'
 import FeedbackView from '@/views/Admin/FeedbackView.vue'
 import UserManagementView from '@/views/Admin/UserManagementView.vue'
@@ -49,14 +49,14 @@ const routes = [
     component: ManageRefillView
   },
   {
-    path: '/admin/delivery',
-    name: 'Delivery',
-    component: DeliveryView
+    path: '/admin/orders',
+    name: 'Orders',
+    component: OrdersView
   },
   {
-    path: '/admin/inventory',
-    name: 'Inventory',
-    component: InventoryView
+    path: '/admin/products',
+    name: 'Products',
+    component: ProductsView
   },
   {
     path: '/admin/sales',
@@ -75,7 +75,7 @@ const routes = [
   },
   {
     path: '/admin/settings',
-    name: 'Account Settings',
+    name: 'Manage Settings',
     component: SettingsView
   },
 
@@ -122,16 +122,17 @@ const router = createRouter({
   routes
 })
 
-// Navigation guard
 router.beforeEach((to, from, next) => {
   const authData = localStorage.getItem('auth');
   const authUser = authData ? JSON.parse(authData).authUser : null;
 
   // Check if the user is authenticated
   if (authUser) {
+    const isAdminOrStaff = authUser.user_role === 'admin' || authUser.user_role === 'staff';
+
     // Redirect authenticated users away from the login/auth routes
     if (to.path === '/' || to.path === '/auth') {
-      if (authUser.user_role === 'admin') {
+      if (isAdminOrStaff) {
         return next('/admin/dashboard');
       } else if (authUser.user_role === 'user') {
         return next('/home');
@@ -139,22 +140,20 @@ router.beforeEach((to, from, next) => {
     }
 
     // Restrict access based on user role
-    if (authUser.user_role === 'admin' && to.path.startsWith('/admin')) {
-      return next(); // Allow admin to access admin routes
+    if (isAdminOrStaff && to.path.startsWith('/admin')) {
+      return next();
     } else if (authUser.user_role === 'user' && !to.path.startsWith('/admin')) {
-      return next(); // Allow user to access non-admin routes
+      return next();
     } else {
-      // Redirect to appropriate route if role doesn't match the route
-      return next(authUser.user_role === 'admin' ? '/admin/dashboard' : '/home');
+      return next(isAdminOrStaff ? '/admin/dashboard' : '/home');
     }
   } else {
-    // If not authenticated, redirect to /auth for any restricted routes
     if (to.path !== '/auth' && to.path !== '/') {
       return next('/auth');
     }
   }
 
-  next(); // Proceed to route if none of the above conditions are met
-})
+  next();
+});
 
 export default router

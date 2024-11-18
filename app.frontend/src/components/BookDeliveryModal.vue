@@ -79,6 +79,7 @@ const handleSlideState = () => {
 // Handle Book Now
 const handleBookNow = async () => {
   FormData.value.gallon_details = gallonPills.value;
+  FormData.value.delivery_type = "Door-To-Door";
   const response = await refillStore.bookRefill(FormData.value);
   console.log(response);
 
@@ -108,7 +109,7 @@ const handleBookNow = async () => {
     EventBus.emit('refillUpdated');
   } else {
     errorIndicator.value = true;
-    errorMsg.value = 'Make sure fill up the booking details';
+    errorMsg.value = 'Make sure fill up the booking details.';
   }
 };
 
@@ -199,16 +200,6 @@ onMounted(() => {
 
       <!-- 2nd Slide Fields -->
       <div v-if="slideState === 1" class="slide-2">
-        <!-- Delivery Type -->
-        <div class="space-y-1 mt-4">
-          <span class="text-gray-700 font-medium">Delivery Type</span>
-          <select v-model="FormData.delivery_type" class="select select-bordered w-full">
-            <option disabled selected>Select delivery type</option>
-            <option>Walk-In</option>
-            <option>Door-To-Door</option>
-          </select>
-        </div>
-
         <!-- Mode of Payment -->
         <div class="space-y-1 mt-4">
           <span class="text-gray-700 font-medium">Mode of Payment</span>

@@ -128,7 +128,7 @@ export const useUsersStore = defineStore('user', {
           current_password: FormData.current_password,
           new_password: FormData.new_password
         });
-        return response;
+        return response.data;
       } catch (error) {
         console.log('Error in ' + error);
       }
