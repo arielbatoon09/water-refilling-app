@@ -138,6 +138,20 @@ export const useProductStore = defineStore('product', {
       }
     },
 
+    async purchaseNow(id, cartArray, mop, deliveryType) {
+      try {
+        const response = await axios.post('/api/checkout-now', {
+          cart_id: id,
+          mop: mop,
+          deliveryType: deliveryType,
+          cartArray: cartArray
+        });
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
     async getAllPurchases() {
       try {
         await this.getToken();

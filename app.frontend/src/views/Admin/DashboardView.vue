@@ -1,10 +1,16 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted  } from 'vue';
 import ApexCharts from 'apexcharts';
 import VueApexCharts from 'vue3-apexcharts';
 import AdminLayout from '@/components/AdminLayout.vue';
+import { useSalesStore } from '@/stores/sales';
+import { useUsersStore } from '@/stores/users';
 
-// Define chart options and data for "Refills Report"
+const useSales = useSalesStore(); 
+const useUser = useUsersStore(); 
+const user = ref(null);
+const role = ref(null);
+
 const refillOptions = ref({
   chart: {
     height: '100%',
@@ -16,7 +22,7 @@ const refillOptions = ref({
   },
   dataLabels: { enabled: false },
   xaxis: {
-    categories: ['Waiting for Delivery', 'Pending Payment', 'Delivered', 'Completed'],
+    categories: ['Waiting for Delivery', 'Pending Payment', 'Delivered', 'Completed', 'Rated'],
   },
   title: {
     text: 'Refills Status',
@@ -24,11 +30,33 @@ const refillOptions = ref({
     style: { fontSize: '16px', fontWeight: '400' },
   },
 });
+
 const refillSeries = ref([
-  { name: 'Refills', data: [2, 2, 3, 3] },
+  { name: 'Refills', data: [0, 0, 0, 0, 0] },
 ]);
 
-// Define chart options and data for "Orders Report"
+const tallyRefill = async () => {
+  try {
+    const response = await useSales.getAllTallySuccessSales();
+    const data = response.data;
+
+    const statusWise = data.refills.status_wise;
+    const refillsStatusCounts = [
+      statusWise['Waiting for Delivery'].total_amount,
+      statusWise['Pending Payment'].total_amount,
+      statusWise['Delivered'].total_amount,
+      statusWise['Completed'].total_amount,
+      statusWise['Rated'].total_amount,
+    ];
+
+    refillSeries.value = [
+      { name: 'Refills', data: refillsStatusCounts }, 
+    ];
+  } catch (error) {
+    console.error('Error fetching gallon data:', error);
+  }
+};
+
 const orderOptions = ref({
   chart: {
     height: '100%',
@@ -49,10 +77,31 @@ const orderOptions = ref({
   },
 });
 const orderSeries = ref([
-  { name: 'Orders', data: [2, 2, 3, 3, 3] },
+  { name: 'Orders', data: [0, 0, 0, 0, 0] },
 ]);
 
-// Define chart options and data for "Sales Report"
+const tallyOrders = async () => {
+  try {
+    const response = await useSales.getAllTallySuccessSales();
+    const data = response.data;
+
+    const statusWise = data.orders.status_wise;
+    const ordersStatusCounts = [
+      statusWise['To Pay'].total_amount,
+      statusWise['To Receive'].total_amount,
+      statusWise['Delivered'].total_amount,
+      statusWise['Completed'].total_amount,
+      statusWise['Rated'].total_amount,
+    ];
+
+    orderSeries.value = [
+      { name: 'Orders', data: ordersStatusCounts }, 
+    ];
+  } catch (error) {
+    console.error('Error fetching gallon data:', error);
+  }
+};
+
 const salesOptions = ref({
   chart: {
     height: '100%',
@@ -72,22 +121,60 @@ const salesOptions = ref({
     style: { fontSize: '16px', fontWeight: '400' },
   },
 });
+
 const salesSeries = ref([
-  { name: 'Sales', data: [2, 2, 3, 3] },
+  { name: 'Sales', data: [0, 0, 0, 0] },
 ]);
 
+const tallySales = async () => {
+  try {
+    const response = await useSales.getAllSuccessSalesData();
+    const data = response.data;
+
+    const statusWise = data;
+    const salesStatusCounts = [
+      statusWise['daily_sales'],
+      statusWise['monthly_sales'],
+      statusWise['yearly_sales'],
+      statusWise['total_sales_amount'],
+    ];
+
+    salesSeries.value = [
+      { name: 'Sales', data: salesStatusCounts }, 
+    ];
+  } catch (error) {
+    console.error('Error fetching gallon data:', error);
+  }
+}
+
+const userInformation = async () => {
+  try {
+    const response = await useUser.getInformation();
+    const data = response.data;
+    user.value = data.name;
+    role.value = data.user_role;
+  } catch (error) {
+    console.error('Error fetching gallon data:', error);
+  }
+}
+
+onMounted(() => {
+  tallyRefill();
+  tallySales();
+  userInformation();
+  tallyOrders();
+});
 
 </script>
 
 <template>
   <AdminLayout>
-    <!-- Main Grid Layout -->
     <div class="mb-5 mt-10">
       <div class="mb-5 px-3 space-y-2">
-        <h2 class="text-gray-700 font-bold text-2xl"><span class="font-medium">Hi</span>, Admin Account<span
+        <h2 class="text-gray-700 font-bold text-2xl"><span class="font-medium">Hi</span>, {{ user }}<span
             class="font-medium">👋</span></h2>
         <p class="font-medium text-base">Logged in as
-          <span class="text-cyan-700 capitalize">Admin</span>!
+          <span class="text-cyan-700 capitalize">{{ role }}</span>!
         </p>
       </div>
 

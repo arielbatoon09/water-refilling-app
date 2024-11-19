@@ -90,6 +90,85 @@ class OrdersController extends Controller
         }
     }
 
+    public function purchaseNow(Request $request)
+    {
+        try {
+            // Validate request inputs
+            $validator = Validator::make($request->all(), [
+                'mop' => 'required|string',
+                'deliveryType' => 'required|string',
+                'cartArray' => 'required|array',
+                'cart_id' => 'required',
+            ]);
+
+            // Check if validation fails
+            if ($validator->fails()) {
+                return response([
+                    'status' => 422,
+                    'source' => 'OrdersController',
+                    'message' => 'Invalid input data!',
+                    'errors' => $validator->errors()
+                ]);
+            }
+            
+            $refNumber = $this->generateUniqueRefNumber();
+            $totalOrderPrice = 0;
+
+            foreach ($request->cartArray as $cart) {
+                $totalItemPrice = $cart['unit_price'] * $cart['order_quantity'];
+                $totalOrderPrice += $totalItemPrice;
+
+                // Create the Cart record
+                Orders::create([
+                    "refid" => $refNumber,
+                    "user_id" => auth()->user()->id,
+                    "cart_id" => $request->cart_id,
+                    "order_quantity" => $cart['order_quantity'],
+                    "total_item_price" => $totalItemPrice,
+                    "mop" => $request->mop,
+                    "delivery_type" => $request->deliveryType,
+                    "status" => $request->mop === 'COD' ? "To Receive" : 'To Pay',
+                ]);
+
+                // Deduct the Order Quantity to Product Stocks
+                $product = Product::where('id', $cart['product_id'])->first();
+                if ($product) {
+                    $newStock = $product->item_stocks - $cart['order_quantity'];
+                    if ($newStock >= 0) {
+                        $product->item_stocks = $newStock;
+                        $product->save();
+                    } else {
+                        return response([
+                            'status' => 400,
+                            'message' => 'Insufficient stock for product: ' . $product->product_name,
+                        ], 400);
+                    }
+                }
+
+                // Update the card id flag
+                $cartId = Cart::where('id', $request->cart_id)->first();
+                if ($cartId) {
+                    $cartId->update([
+                        'flag' => 0,
+                    ]);
+                }
+            }
+
+            return response([
+                'status' => 200,
+                'source' => 'OrdersController',
+                'message' => 'Successfully checked out the order(s)!',
+            ]);
+
+        } catch (Throwable $th) {
+            return response([
+                'status' => 501,
+                'source' => 'OrdersController',
+                'message' => 'Error: ' . $th->getMessage(),
+            ], 501);
+        }
+    }
+
     public function getOrdersUID(Request $request)
     {
         try {

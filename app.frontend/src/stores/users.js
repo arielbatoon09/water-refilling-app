@@ -135,6 +135,25 @@ export const useUsersStore = defineStore('user', {
       
     },
 
+    async getLatestRefill(){
+      try {
+        await this.getToken();
+        const response = await axios.get('/api/get-latest-refill');
+        return response.data;
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    },
+
+    async getLatestOrder(){
+      try {
+        await this.getToken();
+        const response = await axios.get('/api/get-latest-order');
+        return response.data;
+      } catch (error) {
+        console.log('Error in ' + error);
+      }
+    },
 
 
   },

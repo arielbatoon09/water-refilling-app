@@ -31,7 +31,7 @@ class CartController extends Controller
                 ]);
             }
 
-            Cart::create([
+            $cart = Cart::create([
                 "user_id" => auth()->user()->id,
                 "product_id" => $request->product_id,
                 "order_quantity" => $request->order_quantity,
@@ -41,6 +41,7 @@ class CartController extends Controller
 
             return response([
                 'status' => 200,
+                'id' => $cart->id,
                 'source' => 'CartController',
                 'message' => 'Added to cart!',
             ]);

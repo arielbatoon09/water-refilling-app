@@ -8,6 +8,10 @@ const productStore = useProductStore();
 const router = useRouter();
 const productData = ref([]);
 const quantities = ref({});
+const selectedData = ref([]);
+const mop = ref(null);
+const quantityOrder = ref(null);
+const deliveryType = ref(null);
 
 const FormData = ref({
   product_id: null,
@@ -43,11 +47,53 @@ const handleAddToCart = async (data) => {
     quantities.value[data.id] = 1;
     FormData.value.product_id = null;
     FormData.value.order_quantity = null;
-    FormData.value.unit_price = null;
+    FormData.value.unit_price = null; 
 
     router.push('/cart');
   }
 };
+
+const buynow = async (data) => {
+  const transformedData = {
+    ...data,
+    unit_price: data.item_price, 
+    product_id: data.id, 
+    order_quantity: quantities.value[data.id] ?? 1, 
+  };
+  selectedData.value.push(transformedData);
+  document.getElementById('checkoutModal').showModal();
+}
+
+const handleBuyNow = async () => {
+  const data = selectedData.value;
+  try {
+    FormData.value.product_id = data[0].id;
+    FormData.value.order_quantity = quantities.value[data[0].id] ?? 1;
+    FormData.value.unit_price = data[0].item_price;
+    
+    const response = await productStore.addToCart(FormData.value);
+    console.log(response);
+
+    if (response.status === 200) {
+      purchaseNow(response.id, data);
+    }
+  } catch (error) {
+    console.log('Error in ' + error);
+  }
+}
+
+const purchaseNow = async (id, data) => {
+  try {
+    const response = await productStore.purchaseNow(id, data, mop.value, deliveryType.value);
+    console.log(response);
+
+    if(response.status === 200){
+      alert('Purchased Done!');
+    }
+  } catch (error) {
+    console.log('Error in ' + error);
+  }
+}
 
 const renderProductData = async () => {
   const response = await productStore.getProducts();
@@ -136,11 +182,50 @@ onMounted(() => {
               <button @click="handleAddToCart(data)" :class="{ 'disabled': data.item_stocks === 0 }"
                 class="text-sm border border-[#56a7dc] bg-[#f5f8fa] py-2.5 px-4 rounded text-[#56a7dc] active:scale-105 transition-transform ease-linear w-full">Add
                 To Cart</button>
-              <button :class="{ 'disabled': data.item_stocks === 0 }"
+              <button @click="buynow(data)" :class="{ 'disabled': data.item_stocks === 0 }"
                 class="text-sm primary-btn-bg py-2.5 px-6 rounded text-white active:scale-105 transition-transform ease-linear w-full">Buy
                 Now</button>
             </div>
           </div>
+          <dialog id="checkoutModal" class="modal">
+            <div class="modal-box">
+              <form method="dialog">
+                <button ref="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">✕</button>
+              </form>
+              <h3 class="text-lg font-bold">Mode of Payment</h3>
+
+              <!-- Field -->
+              <div class="space-y-2 mt-5">
+                <span class="text-gray-700 font-medium ml-1">Select Payment Method</span>
+                <select v-model="mop" class="select select-bordered w-full">
+                  <option disabled selected>Please select</option>
+                  <option>COD</option>
+                  <option>Online Pay</option>
+                </select>
+              </div>
+
+              <!-- quantityOrder -->
+
+
+
+              <div class="space-y-2 mt-3">
+                <span class="text-gray-700 font-medium ml-1">Delivery Type</span>
+                <select v-model="deliveryType" class="select select-bordered w-full">
+                  <option disabled selected>Select delivery type</option>
+                  <option>Walk-In</option>
+                  <option>Door-To-Door</option>
+                </select>
+              </div>
+
+              <!-- Proceed Button -->
+              <div class="space-y-2 mt-6">
+                <button @click="handleBuyNow" class="btn primary-btn-bg text-white w-full">Proceed</button>
+              </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
         </div>
 
       </div>

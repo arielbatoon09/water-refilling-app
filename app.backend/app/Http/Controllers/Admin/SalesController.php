@@ -44,7 +44,6 @@ class SalesController extends Controller
                 ];
             }
 
-            // Fetch Orders data with success status
             $orders = Orders::whereIn('status', ['Delivered', 'Completed', 'Rated'])
                 ->with(['user', 'cart.product'])
                 ->orderBy('created_at', 'desc')
@@ -104,27 +103,45 @@ class SalesController extends Controller
     public function tallySuccessSales()
     {
         try {
-            // Initialize counters for total sales and transactions
             $totalSalesAmount = 0;
             $totalTransactions = 0;
-
-            // Fetch successful Refills
-            $refills = Refill::whereIn('status', ['Delivered', 'Completed', 'Rated'])->get();
+        
+            $refillStatuses = ['Waiting for Delivery', 'Pending Payment', 'Delivered', 'Completed', 'Rated'];
+            $orderStatuses = ['To Pay', 'To Receive', 'Delivered', 'Completed', 'Rated'];
+        
+            $statusWiseRefills = [];
+            $statusWiseOrders = [];
+        
+            $refills = Refill::whereIn('status', $refillStatuses)->get();
+            foreach ($refillStatuses as $status) {
+                $filteredRefills = $refills->where('status', $status);
+                $statusWiseRefills[$status] = [
+                    'total_amount' => $filteredRefills->sum(function ($refill) {
+                        return $refill->t_refill_fee + $refill->t_delivery_fee;
+                    }),
+                    'total_transactions' => $filteredRefills->count(),
+                ];
+            }
+        
+            $orders = Orders::whereIn('status', $orderStatuses)->get();
+            foreach ($orderStatuses as $status) {
+                $filteredOrders = $orders->where('status', $status);
+                $statusWiseOrders[$status] = [
+                    'total_amount' => $filteredOrders->sum('total_item_price'),
+                    'total_transactions' => $filteredOrders->groupBy('refid')->count(), 
+                ];
+            }
+        
             $totalRefillsAmount = $refills->sum(function ($refill) {
                 return $refill->t_refill_fee + $refill->t_delivery_fee;
             });
-            $totalRefillsCount = $refills->count();
-
-            // Fetch successful Orders
-            $orders = Orders::whereIn('status', ['Delivered', 'Completed', 'Rated'])->get();
             $totalOrdersAmount = $orders->sum('total_item_price');
-            $totalOrdersCount = $orders->groupBy('refid')->count(); // Count unique transactions by refid
-
-            // Calculate totals
+            $totalRefillsCount = $refills->count();
+            $totalOrdersCount = $orders->groupBy('refid')->count();
+        
             $totalSalesAmount = $totalRefillsAmount + $totalOrdersAmount;
             $totalTransactions = $totalRefillsCount + $totalOrdersCount;
-
-            // Return the tally
+        
             return response([
                 'status' => 200,
                 'message' => 'Tally of success sales fetched successfully.',
@@ -134,13 +151,56 @@ class SalesController extends Controller
                     'refills' => [
                         'total_amount' => $totalRefillsAmount,
                         'total_transactions' => $totalRefillsCount,
+                        'status_wise' => $statusWiseRefills, 
                     ],
                     'orders' => [
                         'total_amount' => $totalOrdersAmount,
                         'total_transactions' => $totalOrdersCount,
+                        'status_wise' => $statusWiseOrders,
                     ],
                 ],
             ], 200);
+        } catch (Throwable $th) {
+            return response([
+                'status' => 501,
+                'source' => 'SalesController',
+                'message' => 'Error: ' . $th->getMessage(),
+            ], 501);
+        }
+        
+    }
+
+    public function getSalesData(){
+        try {
+            // Initialize the variables for total sales amounts
+            $dailySales = 0;
+            $monthlySales = 0;
+            $yearlySales = 0;
+            $overallSales = 0;
+    
+            $dailySales = Orders::whereDate('created_at', Carbon::today())
+                ->sum('total_item_price');
+    
+            $monthlySales = Orders::whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->sum('total_item_price'); 
+    
+            $yearlySales = Orders::whereYear('created_at', Carbon::now()->year)
+                ->sum('total_item_price'); 
+    
+            $overallSales = Orders::sum('total_item_price');
+    
+            return response([
+                'status' => 200,
+                'message' => 'Sales data fetched successfully.',
+                'data' => [
+                    'daily_sales' => $dailySales,
+                    'monthly_sales' => $monthlySales,
+                    'yearly_sales' => $yearlySales,
+                    'total_sales_amount' => $overallSales, 
+                ],
+            ], 200);
+    
         } catch (Throwable $th) {
             return response([
                 'status' => 501,

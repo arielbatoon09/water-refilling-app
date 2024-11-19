@@ -67,6 +67,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/remove-to-cart/{id}', [Cart::class, 'removeOrderToCart']);
 
     Route::post('/checkout', [Checkout::class, 'checkout']);
+    Route::post('/checkout-now', [Checkout::class, 'purchaseNow']);
     Route::post('/checkout/pay-now', [Checkout::class, 'generatePayNow']);
     Route::post('/checkout/paid', [Checkout::class, 'updateOrderStatus']);
     Route::post('/checkout/remove/{id}', [Checkout::class, 'removeOrderByCartId']);
@@ -79,14 +80,17 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/get-user-by-uid/{id}', [User::class, 'getUserById']);
     Route::post('/remove-user/{id}', [User::class, 'removeUser']);
     Route::post('/update-user', [User::class, 'updateUser']);
-
+    Route::get('/get-latest-refill', [User::class, 'getLatestRefill']);
+    Route::get('/get-latest-order', [User::class, 'getLatestOrder']);
+    
     Route::get('/get-user-info',[Account::class, 'getUserInformation']);
     Route::get('/get-user-address',[Account::class, 'getAddressInformation']);
     Route::post('/add-user-address',[Account::class, 'addUserAddress']);
     Route::post('/change-user-info',[Account::class, 'updateUserInfo']);
     Route::post('/change-user-password',[Account::class, 'changePassword']);
-    Route::post('/change-user-info',[Account::class, 'updateUserInfo']);
     Route::post('/change-user-address',[Account::class, 'changeAddress']);
 
     Route::get('/get-sales-report',[SalesReport::class, 'getAllSuccessSales']);
+    Route::get('/get-tally-sales-report',[SalesReport::class, 'tallySuccessSales']);
+    Route::get('/get-sales-data-report',[SalesReport::class, 'getSalesData']);
 });

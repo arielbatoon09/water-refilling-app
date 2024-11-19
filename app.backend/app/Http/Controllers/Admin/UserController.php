@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Orders;
+use App\Models\Refill;
 
 class UserController extends Controller
 {
@@ -57,5 +59,32 @@ class UserController extends Controller
             'source' => 'AdminUserControllerRemoveUser',
             'message' => 'Success update user'
         ]);
+    }
+
+    public function getLatestRefill (){
+        $userId = auth()->user()->id;
+
+        $latestRefill = Refill::where('user_id', $userId)->orderBy('created_at', 'desc')->first();
+
+        return response([
+            'status' => 200,
+            'source' => 'AdminUserControllerRemoveUser',
+            'data' => $latestRefill
+        ]);
+
+    }
+
+    public function getLatestOrder (){
+        $userId = auth()->user()->id;
+
+        $latestOrders = Orders::where('user_id', $userId)->orderBy('created_at', 'desc')->value('refid');
+        $getTotalRefId = Orders::where('refid', $latestOrders)->get();
+
+        return response([
+            'status' => 200,
+            'source' => 'AdminUserControllerRemoveUser',
+            'data' => $getTotalRefId
+        ]);
+
     }
 }
