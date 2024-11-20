@@ -1,9 +1,11 @@
 <script setup>
 import dayjs from 'dayjs';
 import { ref, onMounted  } from 'vue';
+import { useRouter } from 'vue-router';
 import DashboardLayout from '@/components/DashboardLayout.vue';
 import { useUsersStore } from '@/stores/users';
 
+const router = useRouter();
 const useUser = useUsersStore();
 const name = ref(null);
 const email = ref(null);
@@ -42,7 +44,7 @@ const userLatestRefill = async () => {
     const response = await useUser.getLatestRefill();
     const data = response.data;
 
-    latestRefill.value = 'You booked a water delivery kindly with a Refill Id: #' + data.id;
+    latestRefill.value = 'You booked a water delivery with a Refill Id: #' + data.id;
 
   } catch (error) {
     console.error('Error fetching gallon data:', error);
@@ -63,6 +65,9 @@ const userLatestOrder = async () => {
   }
 }
 
+const movePage = (page) => {
+  router.push(page);
+}
 
 onMounted(() => {
   userInformation();
@@ -123,9 +128,9 @@ onMounted(() => {
           <h3 class="font-bold text-gray-600 text-xl">Quick Actions</h3>
 
           <div class="text-base space-y-3">
-            <p class="text-gray-600 font-medium hover:underline cursor-pointer">Book Refill</p>
-            <p class="text-gray-600 font-medium hover:underline cursor-pointer">Browse Shop</p>
-            <p class="text-gray-600 font-medium hover:underline cursor-pointer">Edit Profile</p>
+            <p class="text-gray-600 font-medium hover:underline cursor-pointer" @click="movePage('/refill')">Book Refill</p>
+            <p class="text-gray-600 font-medium hover:underline cursor-pointer" @click="movePage('/shop')">Browse Shop</p>
+            <p class="text-gray-600 font-medium hover:underline cursor-pointer" @click="movePage('/account')">Edit Profile</p>
           </div>
         </div>
       </div>
