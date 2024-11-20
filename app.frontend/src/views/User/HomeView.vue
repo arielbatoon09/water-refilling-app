@@ -76,8 +76,8 @@ onMounted(() => {
   <DashboardLayout>
     <div class="pt-4 lg:pt-8 lg:px-24 2xl:px-40 pb-10">
       <div class="flex items-center gap-4">
-        <div class="bg-gray-400 py-4 px-6 rounded-full">
-          <p class="text-white font-bold text-3xl text-center">A</p>
+        <div class="bg-gray-400 w-20 h-20 rounded-full overflow-hidden">
+          <p class="w-full h-full text-white font-bold text-3xl text-center flex justify-center items-center">{{ name ? name.charAt(0) : 'A' }}</p>
         </div>
 
         <div class="space-y-1">

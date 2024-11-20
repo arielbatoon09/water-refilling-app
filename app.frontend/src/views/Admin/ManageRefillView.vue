@@ -224,7 +224,7 @@ onMounted(() => {
                 </span>
               </td>
               <td class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">₱{{ Refill.t_overall_fee }}.00</td>
-              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">
+              <td class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">
                 <span :class="['p-2 rounded',
                   Refill.status === 'Completed' ? 'bg-green-200 text-green-700' : '',
                   Refill.status === 'Pending Payment' ? 'bg-orange-200 text-orange-700' : '',

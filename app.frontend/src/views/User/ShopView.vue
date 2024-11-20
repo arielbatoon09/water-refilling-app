@@ -9,9 +9,10 @@ const router = useRouter();
 const productData = ref([]);
 const quantities = ref({});
 const selectedData = ref([]);
-const mop = ref(null);
-const quantityOrder = ref(null);
-const deliveryType = ref(null);
+const mop = ref('Please select');
+const deliveryType = ref('Select delivery type');
+const isModalOpen = ref(false);
+import Swal from 'sweetalert2';
 
 const FormData = ref({
   product_id: null,
@@ -39,7 +40,7 @@ const handleAddToCart = async (data) => {
   FormData.value.product_id = data.id;
   FormData.value.order_quantity = quantities.value[data.id] ?? 1;
   FormData.value.unit_price = data.item_price;
-  
+
   const response = await productStore.addToCart(FormData.value);
   console.log(response);
 
@@ -47,7 +48,7 @@ const handleAddToCart = async (data) => {
     quantities.value[data.id] = 1;
     FormData.value.product_id = null;
     FormData.value.order_quantity = null;
-    FormData.value.unit_price = null; 
+    FormData.value.unit_price = null;
 
     router.push('/cart');
   }
@@ -56,10 +57,11 @@ const handleAddToCart = async (data) => {
 const buynow = async (data) => {
   const transformedData = {
     ...data,
-    unit_price: data.item_price, 
-    product_id: data.id, 
-    order_quantity: quantities.value[data.id] ?? 1, 
+    unit_price: data.item_price,
+    product_id: data.id,
+    order_quantity: quantities.value[data.id] ?? 1,
   };
+  openModal();
   selectedData.value.push(transformedData);
   document.getElementById('checkoutModal').showModal();
 }
@@ -70,7 +72,7 @@ const handleBuyNow = async () => {
     FormData.value.product_id = data[0].id;
     FormData.value.order_quantity = quantities.value[data[0].id] ?? 1;
     FormData.value.unit_price = data[0].item_price;
-    
+
     const response = await productStore.addToCart(FormData.value);
     console.log(response);
 
@@ -87,8 +89,16 @@ const purchaseNow = async (id, data) => {
     const response = await productStore.purchaseNow(id, data, mop.value, deliveryType.value);
     console.log(response);
 
-    if(response.status === 200){
-      alert('Purchased Done!');
+    if (response.status === 200) {
+      closeModal();
+
+      Swal.fire({
+        title: 'Perfect!',
+        text: response.message,
+        icon: 'success',
+        confirmButtonText: 'Confirm'
+      });
+      router.push('/purchase');
     }
   } catch (error) {
     console.log('Error in ' + error);
@@ -98,6 +108,14 @@ const purchaseNow = async (id, data) => {
 const renderProductData = async () => {
   const response = await productStore.getProducts();
   productData.value = response.data;
+};
+
+const openModal = () => {
+  isModalOpen.value = true;
+};
+
+const closeModal = () => {
+  isModalOpen.value = false;
 };
 
 onMounted(() => {
@@ -117,31 +135,6 @@ onMounted(() => {
         </svg>
         <h2 class="text-2xl font-semibold text-gray-700">Browse Shop</h2>
       </div>
-
-      <!-- Filter Section -->
-      <!-- <div class="flex w-full flex-col-reverse lg:flex-row gap-3 justify-between">
-        <div class="w-full xl:w-1/6">
-          <select class="select select-bordered w-full">
-            <option disabled selected>Filter sales</option>
-            <option>Han Solo</option>
-            <option>Greedo</option>
-          </select>
-        </div>
-
-        <div class="flex items-center w-full lg:w-1/4">
-          <input type="text" placeholder="Search..."
-            class="px-4 py-[0.68rem] outline-none rounded-l-lg w-full border" />
-          <button class="btn btn-square primary-btn-bg text-white rounded rounded-r-lg">
-            <svg class="w-[24px] h-[24px] text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24"
-              height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
-                d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-            </svg>
-          </button>
-        </div>
-      </div> -->
-
-      <!-- <div class="divider"></div> -->
 
       <!-- Main Shop List -->
       <div class="grid md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-4">
@@ -166,7 +159,7 @@ onMounted(() => {
                     -
                   </div>
                   <div class="border-t border-b px-3 py-1 text-gray-500 text-base text-center">
-                    {{ quantities[data.id] ?? 1}}
+                    {{ quantities[data.id] ?? 1 }}
                   </div>
                   <div @click="quantityValueControl('increment', data)"
                     class="border px-2 py-1 text-gray-500 font-bold text-base hover:bg-[#f5f8fa] transition ease-linear cursor-pointer">
@@ -187,14 +180,14 @@ onMounted(() => {
                 Now</button>
             </div>
           </div>
-          <dialog id="checkoutModal" class="modal">
+          
+          <!-- Modal -->
+          <dialog id="checkoutModal" class="modal" :open="isModalOpen">
             <div class="modal-box">
-              <form method="dialog">
-                <button ref="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">✕</button>
-              </form>
+              <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">✕</button>
               <h3 class="text-lg font-bold">Mode of Payment</h3>
 
-              <!-- Field -->
+              <!-- Payment Method -->
               <div class="space-y-2 mt-5">
                 <span class="text-gray-700 font-medium ml-1">Select Payment Method</span>
                 <select v-model="mop" class="select select-bordered w-full">
@@ -204,10 +197,7 @@ onMounted(() => {
                 </select>
               </div>
 
-              <!-- quantityOrder -->
-
-
-
+              <!-- Delivery Type -->
               <div class="space-y-2 mt-3">
                 <span class="text-gray-700 font-medium ml-1">Delivery Type</span>
                 <select v-model="deliveryType" class="select select-bordered w-full">
@@ -222,9 +212,9 @@ onMounted(() => {
                 <button @click="handleBuyNow" class="btn primary-btn-bg text-white w-full">Proceed</button>
               </div>
             </div>
-            <form method="dialog" class="modal-backdrop">
-              <button>close</button>
-            </form>
+
+            <!-- Modal Backdrop -->
+            <form method="dialog" class="modal-backdrop" @click="closeModal"></form>
           </dialog>
         </div>
 

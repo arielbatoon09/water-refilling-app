@@ -22,7 +22,7 @@ const refillOptions = ref({
   },
   dataLabels: { enabled: false },
   xaxis: {
-    categories: ['Waiting for Delivery', 'Pending Payment', 'Delivered', 'Completed', 'Rated'],
+    categories: ['Waiting Delivery', 'Pending Payment', 'Delivered', 'Completed'],
   },
   title: {
     text: 'Refills Status',
@@ -39,14 +39,14 @@ const tallyRefill = async () => {
   try {
     const response = await useSales.getAllTallySuccessSales();
     const data = response.data;
+    console.log('Refill: ', data);
 
     const statusWise = data.refills.status_wise;
     const refillsStatusCounts = [
-      statusWise['Waiting for Delivery'].total_amount,
-      statusWise['Pending Payment'].total_amount,
-      statusWise['Delivered'].total_amount,
-      statusWise['Completed'].total_amount,
-      statusWise['Rated'].total_amount,
+      statusWise['Waiting Delivery'].row_count,
+      statusWise['Pending Payment'].row_count,
+      statusWise['Delivered'].row_count,
+      statusWise['Completed'].row_count,
     ];
 
     refillSeries.value = [
@@ -87,11 +87,11 @@ const tallyOrders = async () => {
 
     const statusWise = data.orders.status_wise;
     const ordersStatusCounts = [
-      statusWise['To Pay'].total_amount,
-      statusWise['To Receive'].total_amount,
-      statusWise['Delivered'].total_amount,
-      statusWise['Completed'].total_amount,
-      statusWise['Rated'].total_amount,
+      statusWise['To Pay'].row_count,
+      statusWise['To Receive'].row_count,
+      statusWise['Delivered'].row_count,
+      statusWise['Completed'].row_count,
+      statusWise['Rated'].row_count,
     ];
 
     orderSeries.value = [
