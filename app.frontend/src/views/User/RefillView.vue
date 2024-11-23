@@ -196,6 +196,11 @@ onMounted(() => {
                     class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600">
                     {{ data.status }}
                   </span>
+
+                  <span v-if="data.status === 'For Pick-up'"
+                    class="text-base bg-yellow-100 px-3 text-center rounded-full text-yellow-600">
+                    {{ data.status }}
+                  </span>
                 </div>
               </div>
             </div>

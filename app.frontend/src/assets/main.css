@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    color-scheme: light !important;
+}
+
 .primary-btn-bg {
     background: #56a7dc;
 }

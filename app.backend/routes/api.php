@@ -35,7 +35,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/update-gallon-type/{id}', [GallonType::class, 'updateGallonStatus']);
     Route::post('/update-refills', [AdminRefill::class, 'updateRefilling']);
     Route::get('/get-all-refills', [AdminRefill::class, 'getAllRefills']);
+    Route::post('/add-manual-refills', [AdminRefill::class, 'addRefillingFunction']);
+
+
     Route::post('/change-refills-delivered/{id}', [AdminRefill::class, 'changeToDelivered']);
+    Route::post('/waiting-for-delivery-refill/{id}', [AdminRefill::class, 'updateWaitingDeliveryStatus']);
     Route::get('/get-selected-gallon/{id}', [GallonType::class, 'getSelectedGallon']);
 
     Route::get('/get-all-orders', [AdminOrder::class, 'getAllOrder']);

@@ -12,6 +12,7 @@ const selectedGallonOption = ref(null);
 const gallonPills = ref([]);
 const gallonData = ref({});
 const slideState = ref(0);
+const user_id = ref(null);
 const no_of_gallon = ref(null);
 const closeModal = ref(null);
 const errorIndicator = ref(false);
@@ -26,7 +27,8 @@ const FormData = ref({
   gallon_details: [],
   delivery_type: 'Walk-In',
   mop: 'Over-The-Counter',
-  delivery_date: formattedDate
+  delivery_date: formattedDate,
+  user_id: null
 });
 
 // Render Gallon List
@@ -66,7 +68,6 @@ const handleGallonPills = () => {
   }
 };
 
-
 // Remove Gallon Pills
 const removeGallonPills = (index) => {
   return gallonPills.value.splice(index, 1);
@@ -75,8 +76,9 @@ const removeGallonPills = (index) => {
 // Handle Book Now
 const handleBookNow = async () => {
   FormData.value.gallon_details = gallonPills.value;
+  FormData.value.user_id = user_id.value;
   console.log(FormData.value);
-  const response = await refillStore.bookRefill(FormData.value);
+  const response = await refillStore.bookManualRefill(FormData.value);
   console.log(response);
 
   if (response.status === 200) {
@@ -91,8 +93,9 @@ const handleBookNow = async () => {
     FormData.value.gallon_details = [];
     FormData.value.delivery_type = 'Walk-In';
     FormData.value.mop = 'Over-The-Counter';
-    FormData.value.delivery_date = null;
+    // FormData.value.delivery_date = null;
     slideState.value = 0;
+    user_id.value = null;
     gallonPills.value = [];
     selectedGallonOption.value = [];
     no_of_gallon.value = null;
@@ -174,6 +177,11 @@ onMounted(() => {
         <div class="space-y-1 mt-4">
           <span class="text-gray-700 font-medium">Number of Gallon/s</span>
           <input v-model="no_of_gallon" type="number" placeholder="Enter number" class="input input-bordered w-full" />
+        </div>
+
+        <div class="space-y-1 mt-4">
+          <span class="text-gray-700 font-medium">User Id <small>(Optional)</small></span>
+          <input v-model="user_id" type="number" placeholder="Enter number" class="input input-bordered w-full" />
         </div>
 
         <!-- Add to List Button -->

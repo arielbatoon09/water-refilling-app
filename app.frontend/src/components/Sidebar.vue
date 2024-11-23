@@ -1,26 +1,30 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSidebarStore } from '@/stores/sidebar';
 import Logo from '@/assets/logo.png';
+import { useUsersStore } from '@/stores/users';
 
 const router = useRouter();
 const sidebarStore = useSidebarStore();
+const useUser = useUsersStore();
+const user_role = ref(null);
 
-// Define the navigation links
-const navLinks = ref([
-  { name: 'Dashboard', route: '/admin/dashboard' },
-  { name: 'Manage Refill', route: '/admin/refill' },
-  { name: 'Gallon Type', route: '/admin/gallon' },
-  { name: 'Products', route: '/admin/products' },
-  { name: 'Orders', route: '/admin/orders' },
-  { name: 'Sales', route: '/admin/sales' },
-  { name: 'Feedback', route: '/admin/feedback' },
-]);
+const userInformation = async () => {
+  try {
+    const response = await useUser.getInformation();
+    const data = response.data;
+    console.log(data.user_role);
+    user_role.value = data.user_role;
+  } catch (error) {
+    console.error('Error fetching user information:', error);
+  }
+};
 
 onMounted(() => {
   // Event listener for viewport changes
   const mediaQuery = window.matchMedia('(min-width: 1024px)');
+  userInformation();
 
   const handleMediaQueryChange = (event) => {
     if (event.matches) {
@@ -75,19 +79,36 @@ const navigateTo = (route) => {
       <nav class="flex-1">
         <ul class="space-y-2">
           <li class="text-gray-500 px-4 pt-6 pb-2.5 font-medium">Main Menu</li>
-          <li v-for="link in navLinks" :key="link.route" @click="navigateTo(link.route)"
+          <li @click="navigateTo('/admin/dashboard')"
             class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
-            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === link.route }">
-            <!-- Dashboard Icon -->
-            <svg v-if="link.name === 'Dashboard'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/dashboard' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === '/admin/dashboard' }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M9.143 4H4.857A.857.857 0 0 0 4 4.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 10 9.143V4.857A.857.857 0 0 0 9.143 4Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286A.857.857 0 0 0 20 9.143V4.857A.857.857 0 0 0 19.143 4Zm-10 10H4.857a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286A.857.857 0 0 0 9.143 14Zm10 0h-4.286a.857.857 0 0 0-.857.857v4.286c0 .473.384.857.857.857h4.286a.857.857 0 0 0 .857-.857v-4.286a.857.857 0 0 0-.857-.857Z" />
             </svg>
+            <span>Dashboard</span>
+          </li>
 
-            <svg v-if="link.name === 'Gallon Type'" class="w-[24px] h-[24px] text-gray-700"
-            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 256 256" xml:space="preserve">
+          <li @click="navigateTo('/admin/refill')"
+            class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/refill' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === '/admin/refill' }" aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z" />
+            </svg>
+            <span>Manage Refill</span>
+          </li>
+
+          <li @click="navigateTo('/admin/gallon')" v-if="user_role === 'admin'"
+            class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/gallon' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"
+              viewBox="0 0 256 256" xml:space="preserve">
               <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;"
                 transform="translate(1.4065934065934016 1.4065934065934016) scale(2.81 2.81)">
                 <path
@@ -116,59 +137,57 @@ const navigateTo = (route) => {
                   transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
               </g>
             </svg>
+            <span>Gallon Type</span>
+          </li>
 
-            <!-- Manage Refill Icon -->
-            <svg v-if="link.name === 'Manage Refill'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M4 10h16m-8-3V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Zm3-7h.01v.01H8V13Zm4 0h.01v.01H12V13Zm4 0h.01v.01H16V13Zm-8 4h.01v.01H8V17Zm4 0h.01v.01H12V17Zm4 0h.01v.01H16V17Z" />
-            </svg>
-
-            <!-- Orders Icon -->
-            <svg v-if="link.name === 'Orders'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z" />
-            </svg>
-
-            <!-- Products Icon -->
-            <svg v-if="link.name === 'Products'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
+          <li @click="navigateTo('/admin/products')" v-if="user_role === 'admin'"
+            class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/products' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === '/admin/products' }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M12 6h8m-8 6h8m-8 6h8M4 16a2 2 0 1 1 3.321 1.5L4 20h5M4 5l2-1v6m-2 0h4" />
             </svg>
+            <span>Products</span>
+          </li>
 
-            <!-- Sales Icon -->
-            <svg v-if="link.name === 'Sales'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
+          <li @click="navigateTo('/admin/orders')"
+            class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/orders' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === '/admin/products' }" aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z" />
+            </svg>
+            <span>Orders</span>
+          </li>
+
+          <li @click="navigateTo('/admin/sales')" v-if="user_role === 'admin'"
+            class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/sales' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === '/admin/sales' }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M10 6.025A7.5 7.5 0 1 0 17.975 14H10V6.025Z" />
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M13.5 3c-.169 0-.334.014-.5.025V11h7.975c.011-.166.025-.331.025-.5A7.5 7.5 0 0 0 13.5 3Z" />
             </svg>
+            <span>Sales</span>
+          </li>
 
-            <!-- Feedback Icon -->
-            <svg v-if="link.name === 'Feedback'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
+          <li @click="navigateTo('/admin/feedback')"
+            class="block py-3 px-6 border-r-[3px] border-transparent transition duration-200 hover:bg-[#edf4f9] text-gray-700 font-medium flex items-center gap-4 cursor-pointer"
+            :class="{ 'bg-[#edf4f9] border-r-[3px] primary-border-clr': $route.path === '/admin/feedback' }">
+            <svg class="w-[24px] h-[24px] text-gray-700"
+              :class="{ 'text-[#094b76]': $route.path === '/admin/feedback' }" aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                 d="M7.556 8.5h8m-8 3.5H12m7.111-7H4.89a.896.896 0 0 0-.629.256.868.868 0 0 0-.26.619v9.25c0 .232.094.455.26.619A.896.896 0 0 0 4.89 16H9l3 4 3-4h4.111a.896.896 0 0 0 .629-.256.868.868 0 0 0 .26-.619v-9.25a.868.868 0 0 0-.26-.619.896.896 0 0 0-.63-.256Z" />
             </svg>
-
-            <!-- User Management Icon -->
-            <svg v-if="link.name === 'User Management'" class="w-[24px] h-[24px] text-gray-700"
-              :class="{ 'text-[#094b76]': $route.path === link.route }" aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
-                d="M4.5 17H4a1 1 0 0 1-1-1 3 3 0 0 1 3-3h1m0-3.05A2.5 2.5 0 1 1 9 5.5M19.5 17h.5a1 1 0 0 0 1-1 3 3 0 0 0-3-3h-1m0-3.05a2.5 2.5 0 1 0-2-4.45m.5 13.5h-7a1 1 0 0 1-1-1 3 3 0 0 1 3-3h3a3 3 0 0 1 3 3 1 1 0 0 1-1 1Zm-1-9.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z" />
-            </svg>
-
-            <!-- Router Name -->
-            <span>{{ link.name }}</span>
+            <span>Feedback</span>
           </li>
 
           <li class="text-gray-500 px-4 pt-4 pb-2.5 border-t font-medium">Other</li>

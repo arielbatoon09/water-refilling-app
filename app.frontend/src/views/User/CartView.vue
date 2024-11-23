@@ -13,6 +13,8 @@ const selectedData = ref([]);
 const mop = ref('Please select');
 const deliveryType = ref('Select delivery type');
 const closeModal = ref(null);
+const errorIndicator = ref(false);
+const errorMsg = ref('Make sure to select your order/s.');
 
 const initializeQuantity = (id, order_quantity) => {
   if (!(id in quantities.value)) {
@@ -86,7 +88,11 @@ const handleCheckout = async () => {
     });
 
     router.push('/purchase');
+  } else if(response.status == 409){
+    errorIndicator.value = true;
+    errorMsg.value = 'Make sure you have an addresses!';
   }
+  
 };
 
 onMounted(() => {
@@ -205,6 +211,23 @@ onMounted(() => {
                 </g>
               </svg>
               Error: Make sure to select your order/s.
+            </p>
+
+            <p v-show="errorIndicator" class="text-red-500 flex items-center gap-1 mt-1">
+              <svg class="w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#e86868">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                  <circle cx="12" cy="17" r="1" fill="#e86868"></circle>
+                  <path d="M12 10L12 14" stroke="#e86868" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                  </path>
+                  <path
+                    d="M3.44722 18.1056L10.2111 4.57771C10.9482 3.10361 13.0518 3.10362 13.7889 4.57771L20.5528 18.1056C21.2177 19.4354 20.2507 21 18.7639 21H5.23607C3.7493 21 2.78231 19.4354 3.44722 18.1056Z"
+                    stroke="#e86868" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </g>
+              </svg>
+              Error: {{ errorMsg }}
             </p>
 
             <!-- Field -->

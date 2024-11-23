@@ -183,7 +183,10 @@ onMounted(() => {
           <tbody>
             <tr v-for="order in filteredOrders" :key="order.refid" class="hover:bg-gray-50">
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ order.refid }}</td>
-              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ order.user.name }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ order.user.name }}
+                <br>
+                (UID: #{{ order.user.uid }})
+              </td>
               <td class="ppy-2 px-2 sm:py-4 sm:px-4 text-center">{{ order.mop }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ order.deliveryType }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Cart;
+use App\Models\Addresses;
 use App\Models\Product;
 use Throwable;
 
@@ -13,46 +14,57 @@ class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
-        try {
-            // Validate request inputs
-            $validator = Validator::make($request->all(), [
-                'product_id' => 'required|numeric',
-                'order_quantity' => 'required|numeric',
-                'unit_price' => 'required|numeric',
-            ]);
+        $addresses = Addresses::where('user_id', auth()->user()->id)->first();
 
-            // Check if validation fails
-            if ($validator->fails()) {
-                return response([
-                    'status' => 422,
-                    'source' => 'CartController',
-                    'message' => 'Failed Add to Cart!',
-                    'errors' => $validator->errors()
+        if($addresses){ 
+            try {
+                // Validate request inputs
+                $validator = Validator::make($request->all(), [
+                    'product_id' => 'required|numeric',
+                    'order_quantity' => 'required|numeric',
+                    'unit_price' => 'required|numeric',
                 ]);
+    
+                // Check if validation fails
+                if ($validator->fails()) {
+                    return response([
+                        'status' => 422,
+                        'source' => 'CartController',
+                        'message' => 'Failed Add to Cart!',
+                        'errors' => $validator->errors()
+                    ]);
+                }
+    
+                $cart = Cart::create([
+                    "user_id" => auth()->user()->id,
+                    "product_id" => $request->product_id,
+                    "order_quantity" => $request->order_quantity,
+                    "unit_price" => $request->unit_price,
+                    "flag" => 1,
+                ]);
+    
+                return response([
+                    'status' => 200,
+                    'id' => $cart->id,
+                    'source' => 'CartController',
+                    'message' => 'Added to cart!',
+                ]);
+    
+            } catch (Throwable $th) {
+                return response([
+                    'status' => 501,
+                    'source' => 'CartController',
+                    'message' => 'Error: ' . $th->getMessage(),
+                ], 501);
             }
-
-            $cart = Cart::create([
-                "user_id" => auth()->user()->id,
-                "product_id" => $request->product_id,
-                "order_quantity" => $request->order_quantity,
-                "unit_price" => $request->unit_price,
-                "flag" => 1,
-            ]);
-
+        }else{
             return response([
-                'status' => 200,
-                'id' => $cart->id,
-                'source' => 'CartController',
-                'message' => 'Added to cart!',
+                'status' => 409,
+                'source' => 'RefillController',
+                'message' => 'No Address',
             ]);
-
-        } catch (Throwable $th) {
-            return response([
-                'status' => 501,
-                'source' => 'CartController',
-                'message' => 'Error: ' . $th->getMessage(),
-            ], 501);
         }
+       
     }
 
     public function getAllUIDCart()

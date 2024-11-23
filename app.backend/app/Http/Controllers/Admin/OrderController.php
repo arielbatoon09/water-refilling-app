@@ -37,6 +37,7 @@ class OrderController extends Controller
                     'orders' => [],
                     'user_role' => $user->user_role,
                     'user' => [
+                        'uid' => $user->id,
                         'name' => $user->name,
                         'email' => $user->email,
                     ],

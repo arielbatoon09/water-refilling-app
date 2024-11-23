@@ -186,6 +186,8 @@ class SalesController extends Controller
         try {
             // Define the valid statuses for the sales report
             $validStatuses = ['Delivered', 'Completed', 'Rated'];
+            $validStatuses = ['Delivered', 'Completed', 'Rated'];
+            
     
             // Initialize the variables for total sales amounts
             $dailySales = 0;
@@ -209,16 +211,32 @@ class SalesController extends Controller
     
             $overallSales = Orders::whereIn('status', $validStatuses)
                 ->sum('total_item_price');
+
+            $dailyRefillSales = Refill::whereIn('status', $validStatuses)
+                ->whereDate('created_at', Carbon::today())
+                ->sum('t_refill_fee', 't_delivery_fee');
+    
+            $monthlyRefillSales = Refill::whereIn('status', $validStatuses)
+                ->whereMonth('created_at', Carbon::now()->month)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->sum('t_refill_fee', 't_delivery_fee');
+    
+            $yearlyRefillSales = Refill::whereIn('status', $validStatuses)
+                ->whereYear('created_at', Carbon::now()->year)
+                ->sum('t_refill_fee', 't_delivery_fee');
+    
+            $overallRefillSales = Refill::whereIn('status', $validStatuses)
+            ->sum('t_refill_fee', 't_delivery_fee');
     
             // Return the response with the calculated sales data
             return response([
                 'status' => 200,
                 'message' => 'Sales data fetched successfully.',
                 'data' => [
-                    'daily_sales' => $dailySales,
-                    'monthly_sales' => $monthlySales,
-                    'yearly_sales' => $yearlySales,
-                    'total_sales_amount' => $overallSales,
+                    'daily_sales' => $dailySales + $dailyRefillSales,
+                    'monthly_sales' => $monthlySales + $monthlyRefillSales,
+                    'yearly_sales' => $yearlySales + $yearlyRefillSales,
+                    'total_sales_amount' => $overallSales + $overallRefillSales,
                 ],
             ], 200);
         } catch (Throwable $th) {

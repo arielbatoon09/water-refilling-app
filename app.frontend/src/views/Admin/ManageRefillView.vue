@@ -14,7 +14,7 @@ const currentTab = ref('All');
 const currentPage = ref(1);
 const itemsPerPage = 10;
 
-const tabs = ['All', 'Waiting Delivery', 'Pending Payment', 'Delivered', 'Completed'];
+const tabs = ['All', 'For Pick-up', 'Waiting Delivery', 'Pending Payment', 'Delivered', 'Completed'];
 
 const performSearch = () => {
   searchQuery.value = searchInput.value.trim();
@@ -110,6 +110,40 @@ const changeToDelivered = async (id) => {
   }
 }
 
+// Click to waiting for delivery
+const changeTowaitingForDelivery = async (id) => {
+  try {
+    const response = await refillStore.changeToWaitingForDelivery(id);
+
+    if (response.status == 200) {
+      Swal.fire('success', 'Delivered!', 'success');
+    } else {
+      console.log(response);
+    }
+  } catch (error) {
+    console.log('Error in ' + error);
+  }
+}
+
+const confirmActionDelivery = (id) => {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'This action cannot be undone!',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, do it!',
+    cancelButtonText: 'No, cancel!',
+    reverseButtons: true,
+  }).then((result) => {
+    if (result.isConfirmed) {
+      changeTowaitingForDelivery(id);
+      getAllRefills();
+    } else {
+      Swal.fire('Cancelled', 'Your action has been canceled', 'error');
+    }
+  });
+};
+
 const confirmAction = (id) => {
   Swal.fire({
     title: 'Are you sure?',
@@ -180,7 +214,7 @@ onMounted(() => {
         <table class="w-full table-auto bg-white text-left border-collapse">
           <thead>
             <tr class="border-b border-gray-200 bg-gray-50 text-sm md:text-base">
-              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">ID</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">Refill No.</th>
               <th class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">Name</th>
               <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Details</th>
               <th class="py-2 px-2 sm:py-4 sm:px-6 text-center whitespace-nowrap">Delivery Type</th>
@@ -196,7 +230,10 @@ onMounted(() => {
           <tbody>
             <tr v-for="Refill in filteredRefills" :key="Refill.id" class="hover:bg-gray-50">
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">{{ Refill.id }}</td>
-              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ Refill.name }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap">{{ Refill.name }}
+                <br>
+                (UID: #{{ Refill.uid }})
+              </td>
               <td class="py-2 px-2 sm:py-4 sm:px-6 text-center">
                 <span v-for="(gallon, index) in Refill.gallon_details" :key="index">
                   {{ gallon.gallon_size }} - {{ gallon.no_of_gallon }} Gallon(s)
@@ -229,7 +266,8 @@ onMounted(() => {
                   Refill.status === 'Completed' ? 'bg-green-200 text-green-700' : '',
                   Refill.status === 'Pending Payment' ? 'bg-orange-200 text-orange-700' : '',
                   Refill.status === 'Delivered' ? 'bg-cyan-200 text-cyan-700' : '',
-                  Refill.status === 'Waiting Delivery' ? 'bg-yellow-200 text-yellow-700' : ''
+                  Refill.status === 'Waiting Delivery' ? 'bg-yellow-200 text-yellow-700' : '',
+                  Refill.status === 'For Pick-up' ? 'bg-yellow-200 text-yellow-700' : ''
                 ]">
                   {{ Refill.status }}
                 </span>
@@ -237,15 +275,18 @@ onMounted(() => {
               <td class="text-center">
                 <div class="dropdown dropdown-end">
                   <button class="btn btn-xs sm:btn-sm">
-                    <svg class="w-4 h-4 sm:w-6 sm:h-6 text-gray-700" xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24">
+                    <svg class="w-[24px] h-[24px] text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                      width="24" height="24" fill="none" viewBox="0 0 24 24">
                       <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5"
                         d="M6 12h.01m6 0h.01m5.99 0h.01" />
                     </svg>
                   </button>
-                  <ul class="dropdown-content menu bg-base-100 rounded-box z-[1] w-40 p-2 shadow">
-                    <li :class="{ 'disabled': Refill.status !== 'Waiting Delivery' }">
+                  <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+                    <li v-if="Refill.status === 'Waiting Delivery'" :class="{ 'disabled': Refill.status !== 'Waiting Delivery' }">
                       <a @click="confirmAction(Refill.id)">Mark as Delivered</a>
+                    </li>
+                    <li v-else :class="{ 'disabled': Refill.status !== 'For Pick-up' }">
+                      <a @click="confirmActionDelivery(Refill.id)">Mark as Picked-up</a>
                     </li>
                   </ul>
                 </div>

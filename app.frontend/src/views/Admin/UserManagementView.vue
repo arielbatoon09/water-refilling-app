@@ -13,6 +13,7 @@ const activeModal = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 10;
 const selectedId = ref(null);
+const user_role = ref(null);
 
 const userUpdate = ref({
   name: null,
@@ -24,6 +25,17 @@ const userUpdate = ref({
 const performSearch = () => {
   searchQuery.value = searchInput.value.trim();
   currentPage.value = 1;
+};
+
+const userInformation = async () => {
+  try {
+    const response = await userStore.getInformation();
+    const data = response.data;
+    console.log(data.user_role);
+    user_role.value = data.user_role;
+  } catch (error) {
+    console.error('Error fetching user information:', error);
+  }
 };
 
 const filteredUsers = computed(() => {
@@ -90,6 +102,7 @@ const actionModal = async (id) => {
 const renderUsers = async () => {
   try {
     const response = await userStore.getAllUser();
+    console.log(response);
     users.value = response.data;
   } catch (error) {
     console.log('Error in ' + error);
@@ -136,6 +149,7 @@ const prevPage = () => {
 
 onMounted(() => {
   renderUsers();
+  userInformation();
 });
 </script>
 
@@ -175,9 +189,11 @@ onMounted(() => {
               <th class="py-2 px-2 sm:py-4 sm:px-4 text-center whitespace-nowrap w-20">User ID</th>
               <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Full Name</th>
               <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Email</th>
-              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Role</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Success Refills</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Success Order</th>
+              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Role</th> 
               <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Status</th>
-              <th class="py-2 px-2 sm:py-4 sm:px-4 text-center">Actions</th>
+              <th v-if="user_role === 'admin'" class="py-2 px-2 sm:py-4 sm:px-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -185,6 +201,8 @@ onMounted(() => {
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.id }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.name }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.email }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.successRefill }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ user.successOrders }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">
                 <span v-if="user.user_role === 'user'" class="p-2 rounded bg-cyan-200 text-cyan-700 capitalize">{{
                   user.user_role }}</span>
@@ -197,7 +215,7 @@ onMounted(() => {
                 <span v-if="user.flag == 1" class="p-2 rounded bg-green-200 text-green-700">Active</span>
                 <span v-else class="p-2 rounded bg-red-200 text-red-700">Disabled</span>
               </td>
-              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">
+              <td v-if="user_role === 'admin'" class="py-2 px-2 sm:py-4 sm:px-4 text-center">
                 <div class="dropdown dropdown-end">
                   <button class="btn btn-xs sm:btn-sm">
                     <svg class="w-[24px] h-[24px] text-gray-700" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"

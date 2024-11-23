@@ -5,8 +5,9 @@ import { useRouter } from 'vue-router';
 import DashboardLayout from '@/components/DashboardLayout.vue';
 import { useUsersStore } from '@/stores/users';
 
-const router = useRouter();
+const router  = useRouter();
 const useUser = useUsersStore();
+const id = ref(null);
 const name = ref(null);
 const email = ref(null);
 const email_verified_at = ref(null);
@@ -21,7 +22,7 @@ const userInformation = async () => {
   try {
     const response = await useUser.getInformation();
     const data = response.data;
-
+    id.value = data.id;
     name.value = data.name;
     email.value = data.email;
     email_verified_at.value = data.email_verified_at;
@@ -102,8 +103,8 @@ onMounted(() => {
           </div>
 
           <div class="text-base">
-            <p class="text-gray-500">Last Logged in</p>
-            <p class="text-gray-600 font-medium">{{ date(updated_at) }}</p>
+            <p class="text-gray-500">User ID</p>
+            <p class="text-gray-600 font-medium">UID: #{{ id }}</p>
           </div>
 
           <div class="text-base">

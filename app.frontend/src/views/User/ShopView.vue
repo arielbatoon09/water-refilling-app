@@ -5,11 +5,14 @@ import { useProductStore } from '@/stores/product';
 import DashboardLayout from '@/components/DashboardLayout.vue';
 
 const productStore = useProductStore();
+const activeModal = ref(null);
 const router = useRouter();
 const productData = ref([]);
 const quantities = ref({});
 const selectedData = ref([]);
 const mop = ref('Please select');
+const errorIndicator = ref(false);
+const errorMsg = ref(null);
 const deliveryType = ref('Select delivery type');
 const isModalOpen = ref(false);
 import Swal from 'sweetalert2';
@@ -55,15 +58,40 @@ const handleAddToCart = async (data) => {
 };
 
 const buynow = async (data) => {
+
   const transformedData = {
     ...data,
     unit_price: data.item_price,
     product_id: data.id,
     order_quantity: quantities.value[data.id] ?? 1,
   };
-  openModal();
+  // openModal();
   selectedData.value.push(transformedData);
-  document.getElementById('checkoutModal').showModal();
+  // document.getElementById('checkoutModal').showModal();
+
+  const modal = document.getElementById(`modal_${data.id}`);
+  if(!modal) return;
+
+  if(activeModal.value === data.id){
+    modal.close();
+    activeModal.value = null;
+  }else{
+    activeModal.value = data.id;
+    modal.showModal();
+  }
+}
+
+const actionModal = (id) => {
+  const modal = document.getElementById(`modal_${id}`);
+  if(!modal) return;
+
+  if(activeModal.value === id){
+    modal.close();
+    activeModal.value = null;
+  }else{
+    activeModal.value = id;
+    modal.showModal();
+  }
 }
 
 const handleBuyNow = async () => {
@@ -78,6 +106,9 @@ const handleBuyNow = async () => {
 
     if (response.status === 200) {
       purchaseNow(response.id, data);
+    } else if(response.status === 409){
+      errorIndicator.value = true;
+      errorMsg.value = 'Make sure you have an addresses!';
     }
   } catch (error) {
     console.log('Error in ' + error);
@@ -182,11 +213,25 @@ onMounted(() => {
           </div>
           
           <!-- Modal -->
-          <dialog id="checkoutModal" class="modal" :open="isModalOpen">
+          <dialog :id="'modal_' + data.id" class="modal" >
             <div class="modal-box">
-              <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">✕</button>
+              <button @click="actionModal(data.id)" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">✕</button>
               <h3 class="text-lg font-bold">Mode of Payment</h3>
-
+              <p v-if="errorIndicator" class="text-red-500 flex items-center gap-1 mt-1">
+                <svg class="w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#e86868">
+                  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                  <g id="SVGRepo_iconCarrier">
+                    <circle cx="12" cy="17" r="1" fill="#e86868"></circle>
+                    <path d="M12 10L12 14" stroke="#e86868" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    </path>
+                    <path
+                      d="M3.44722 18.1056L10.2111 4.57771C10.9482 3.10361 13.0518 3.10362 13.7889 4.57771L20.5528 18.1056C21.2177 19.4354 20.2507 21 18.7639 21H5.23607C3.7493 21 2.78231 19.4354 3.44722 18.1056Z"
+                      stroke="#e86868" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </g>
+                </svg>
+                Error: {{ errorMsg }}
+              </p>
               <!-- Payment Method -->
               <div class="space-y-2 mt-5">
                 <span class="text-gray-700 font-medium ml-1">Select Payment Method</span>
@@ -214,7 +259,7 @@ onMounted(() => {
             </div>
 
             <!-- Modal Backdrop -->
-            <form method="dialog" class="modal-backdrop" @click="closeModal"></form>
+            <form method="dialog" class="modal-backdrop" @click="actionModal(data.id)"></form>
           </dialog>
         </div>
 

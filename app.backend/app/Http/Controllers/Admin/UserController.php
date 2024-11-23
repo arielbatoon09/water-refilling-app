@@ -13,10 +13,34 @@ class UserController extends Controller
     public function getAllUser(){
         $users = User::all();
 
+        $data = [];
+
+        foreach ($users as $user) {
+            $getRefillers = Refill::whereIn('status', ['Delivered', 'Completed', 'Rated'])
+                ->orderBy('created_at', 'desc')
+                ->where('user_id', $user->id)
+                ->get();
+    
+            $getOrders = Orders::whereIn('status', ['Delivered', 'Completed', 'Rated'])
+                ->orderBy('created_at', 'desc')
+                ->where('user_id', $user->id)
+                ->get();
+
+            $data[] = [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'user_role' => $user->user_role,
+                'flag' => $user->flag,
+                'successRefill' => $getRefillers->count(),
+                'successOrders' => $getOrders->count(),
+            ];
+        }
+
         return response([
             'status' => 200,
             'source' => 'AdminUserControllerGetAllUser',
-            'data' => $users
+            'data' => $data,
         ]);
     }
 

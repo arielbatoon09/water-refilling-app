@@ -15,7 +15,8 @@ export const useRefillStore = defineStore('refill', {
           gallon_details: FormData.gallon_details,
           delivery_type: FormData.delivery_type,
           mop: FormData.mop,
-          delivery_date: FormData.delivery_date
+          delivery_date: FormData.delivery_date,
+          user_id: FormData.user_id,
         });
         return response.data;
 
@@ -103,7 +104,35 @@ export const useRefillStore = defineStore('refill', {
       } catch (error) {
         console.error(error);
       }
-    }
+    },
+
+    async changeToWaitingForDelivery(id){
+      try {
+        await this.getToken();
+        const response = await axios.post('/api/waiting-for-delivery-refill/' + id);
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async bookManualRefill(FormData) {
+      try {
+        await this.getToken();
+
+        const response = await axios.post('/api/add-manual-refills', {
+          gallon_details: FormData.gallon_details,
+          delivery_type: FormData.delivery_type,
+          mop: FormData.mop,
+          delivery_date: FormData.delivery_date,
+          user_id: FormData.user_id,
+        });
+        return response.data;
+
+      } catch (error) {
+        console.error(error);
+      }
+    },
 
   },
 });

@@ -137,7 +137,10 @@ onMounted(() => {
           <tbody>
             <tr v-for="sale in filteredSales" :key="sale.id" class="hover:bg-gray-50">
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.uid }}</td>
-              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.name }}</td>
+              <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.name }}
+                <br>
+                (UID: #{{ sale.uid }})
+              </td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.type }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.id }}</td>
               <td class="py-2 px-2 sm:py-4 sm:px-4 text-center">{{ sale.details }}</td>

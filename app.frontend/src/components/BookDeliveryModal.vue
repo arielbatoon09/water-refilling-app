@@ -107,6 +107,9 @@ const handleBookNow = async () => {
 
     // Emit an event to notify other components
     EventBus.emit('refillUpdated');
+  } else if(response.status == 409){
+    errorIndicator.value = true;
+    errorMsg.value = 'Make sure you have an addresses!';
   } else {
     errorIndicator.value = true;
     errorMsg.value = 'Make sure fill up the booking details.';
