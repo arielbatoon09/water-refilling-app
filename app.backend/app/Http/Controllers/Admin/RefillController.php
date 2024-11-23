@@ -124,73 +124,11 @@ class RefillController extends Controller
 
     public function addRefillingFunction(Request $request)
     {
-        if($request->user_id == null){
-            $validator = Validator::make($request->all(), [
-                'gallon_details' => 'required|array|min:1',
-                'delivery_type' => 'required|string',
-                'mop' => 'required|string',
-                'delivery_date' => 'required|date',
-            ]);
-        
-            // Check if validation fails
-            if ($validator->fails()) {
-                return response([
-                    'status' => 422,
-                    'source' => 'RefillController',
-                    'message' => 'Error Refill Submission!',
-                    'errors' => $validator->errors()
-                ]);
-            }
-        
-            try {
-                $gallonDetails = json_encode($request->gallon_details);
-                $t_refill_fee = 0;
-                $t_delivery_fee = 0;
-                $delivery_extra_fee = 0;
-                
-                foreach ($request->gallon_details as $gallon) { 
-                    $t_refill_fee += $gallon['gallon_each_price'] * $gallon['no_of_gallon'];
-                    $t_delivery_fee += $gallon['gallon_each_dfee'] * $gallon['no_of_gallon'];
-                }
+        $addresses = Addresses::where('user_id', $request->user_id)->first();
 
-                $status = 'Pending Payment'; 
-                if ($request->delivery_type === 'Door-To-Door' && $request->mop === 'COD') {
-                    $status = 'For Pick-up';
-                } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'COD') {
-                    $status = 'Visit Shop';
-                } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'Over-The-Counter') {
-                    $status = 'Completed';
-                } else {
-                    $status = 'Pending Payment';
-                }
-                
-                Refill::create([
-                    "user_id" => auth()->user()->id,
-                    "gallon_details" => $gallonDetails,
-                    "delivery_type" => $request->delivery_type,
-                    "mop" => $request->mop,
-                    "delivery_date" => $request->delivery_date,
-                    "t_refill_fee" => $t_refill_fee,
-                    "t_delivery_fee" => $request->delivery_type === 'Walk-In' ? $t_delivery_fee = 0 : $t_delivery_fee,
-                    "status" => $status
-                ]);
-                
-                return response([
-                    'status' => 200,
-                    'source' => 'RefillController',
-                    'message' => 'Water refill booking completed successfully!',
-                ]);
-            } catch (Throwable $th) {
-                return response([
-                    'status' => 501,
-                    'source' => 'RefillController',
-                    'message' => 'Error: ' . $th->getMessage(),
-                ], 501);
-            }
-        }else{
-           $userId = User::where('id', $request->user_id )->first();
+        if($addresses){
 
-            if($userId){
+            if($request->user_id == null){
                 $validator = Validator::make($request->all(), [
                     'gallon_details' => 'required|array|min:1',
                     'delivery_type' => 'required|string',
@@ -218,7 +156,7 @@ class RefillController extends Controller
                         $t_refill_fee += $gallon['gallon_each_price'] * $gallon['no_of_gallon'];
                         $t_delivery_fee += $gallon['gallon_each_dfee'] * $gallon['no_of_gallon'];
                     }
-
+    
                     $status = 'Pending Payment'; 
                     if ($request->delivery_type === 'Door-To-Door' && $request->mop === 'COD') {
                         $status = 'For Pick-up';
@@ -231,8 +169,7 @@ class RefillController extends Controller
                     }
                     
                     Refill::create([
-                        // "user_id" => auth()->user()->id,
-                        "user_id" => $request->user_id,
+                        "user_id" => auth()->user()->id,
                         "gallon_details" => $gallonDetails,
                         "delivery_type" => $request->delivery_type,
                         "mop" => $request->mop,
@@ -255,13 +192,88 @@ class RefillController extends Controller
                     ], 501);
                 }
             }else{
-                return response([
-                    'status' => 200,
-                    'source' => 'RefillController',
-                    'message' => 'Not Found',
-                ]);
+               $userId = User::where('id', $request->user_id )->first();
+    
+                if($userId){
+                    $validator = Validator::make($request->all(), [
+                        'gallon_details' => 'required|array|min:1',
+                        'delivery_type' => 'required|string',
+                        'mop' => 'required|string',
+                        'delivery_date' => 'required|date',
+                    ]);
+                
+                    // Check if validation fails
+                    if ($validator->fails()) {
+                        return response([
+                            'status' => 422,
+                            'source' => 'RefillController',
+                            'message' => 'Error Refill Submission!',
+                            'errors' => $validator->errors()
+                        ]);
+                    }
+                
+                    try {
+                        $gallonDetails = json_encode($request->gallon_details);
+                        $t_refill_fee = 0;
+                        $t_delivery_fee = 0;
+                        $delivery_extra_fee = 0;
+                        
+                        foreach ($request->gallon_details as $gallon) { 
+                            $t_refill_fee += $gallon['gallon_each_price'] * $gallon['no_of_gallon'];
+                            $t_delivery_fee += $gallon['gallon_each_dfee'] * $gallon['no_of_gallon'];
+                        }
+    
+                        $status = 'Pending Payment'; 
+                        if ($request->delivery_type === 'Door-To-Door' && $request->mop === 'COD') {
+                            $status = 'For Pick-up';
+                        } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'COD') {
+                            $status = 'Visit Shop';
+                        } elseif ($request->delivery_type === 'Walk-In' && $request->mop === 'Over-The-Counter') {
+                            $status = 'Completed';
+                        } else {
+                            $status = 'Pending Payment';
+                        }
+                        
+                        Refill::create([
+                            // "user_id" => auth()->user()->id,
+                            "user_id" => $request->user_id,
+                            "gallon_details" => $gallonDetails,
+                            "delivery_type" => $request->delivery_type,
+                            "mop" => $request->mop,
+                            "delivery_date" => $request->delivery_date,
+                            "t_refill_fee" => $t_refill_fee,
+                            "t_delivery_fee" => $request->delivery_type === 'Walk-In' ? $t_delivery_fee = 0 : $t_delivery_fee,
+                            "status" => $status
+                        ]);
+                        
+                        return response([
+                            'status' => 200,
+                            'source' => 'RefillController',
+                            'message' => 'Water refill booking completed successfully!',
+                        ]);
+                    } catch (Throwable $th) {
+                        return response([
+                            'status' => 501,
+                            'source' => 'RefillController',
+                            'message' => 'Error: ' . $th->getMessage(),
+                        ], 501);
+                    }
+                }else{
+                    return response([
+                        'status' => 200,
+                        'source' => 'RefillController',
+                        'message' => 'Not Found',
+                    ]);
+                }
             }
+        }else{
+            return response([
+                'status' => 409,
+                'source' => 'RefillController',
+                'message' => 'No Address',
+            ]);
         }
+
         
     }
     

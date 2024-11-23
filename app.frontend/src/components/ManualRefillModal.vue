@@ -106,6 +106,9 @@ const handleBookNow = async () => {
 
     // Emit an event to notify other components
     EventBus.emit('refillUpdated');
+  } else if(response.status == 409){
+    errorIndicator.value = true;
+    errorMsg.value = 'This user has no address!';
   } else {
     errorIndicator.value = true;
     errorMsg.value = 'Make sure fill up the booking details';
@@ -122,7 +125,7 @@ onMounted(() => {
     <form method="dialog">
       <button ref="closeModal" class="btn btn-sm btn-circle btn-ghost absolute right-4 top-6">✕</button>
     </form>
-    <h3 class="text-lg font-bold">Book Delivery</h3>
+    <h3 class="text-lg font-bold">Manual Refill</h3>
     <!-- Error Indicator -->
     <p v-if="errorIndicator" class="text-red-500 flex items-center gap-1 mt-1">
       <svg class="w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#e86868">
@@ -192,7 +195,7 @@ onMounted(() => {
       </div>
 
       <div class="space-y-2 mt-6">
-        <button @click="handleBookNow" class="btn primary-btn-bg text-white w-full">Book Now</button>
+        <button @click="handleBookNow" class="btn primary-btn-bg text-white w-full">Submit Refill</button>
       </div>
     </div>
   </div>
