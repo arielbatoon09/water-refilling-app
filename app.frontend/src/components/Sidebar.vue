@@ -12,10 +12,12 @@ const user_role = ref(null);
 
 const userInformation = async () => {
   try {
-    const response = await useUser.getInformation();
-    const data = response.data;
-    console.log(data.user_role);
-    user_role.value = data.user_role;
+    const localRole = JSON.parse(localStorage.getItem('auth'));
+    console.log(localRole.authUser.user_role);
+    // const response = await useUser.getInformation();
+    // const data = response.data;
+    // console.log(data.user_role);
+    user_role.value = localRole.authUser.user_role;
   } catch (error) {
     console.error('Error fetching user information:', error);
   }
